@@ -1,2 +1,3 @@
 # CPU
-is the ifo page
+this is the info page
+
