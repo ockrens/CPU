@@ -1,50 +1,155 @@
 #include <stdio.h>
-#include <stdint.h>  // For standard fixed-width integer types
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
 
-// Function to write a 16-bit number in little-endian format at a specific file position
-void write_little_endian_16_at_offset(FILE *file, uint16_t value, long offset) {
-    // Move the file pointer to the specified address
-    fseek(file, offset, SEEK_SET);
+// Define binary codes for instructions
+#define LOAD_A_5    0x11  // Binary: 0001 0001
+#define LOAD_B_10   0x12  // Binary: 0001 0010
+#define ADD_A_B     0x21  // Binary: 0010 0001
+#define STORE_A     0x31  // Binary: 0011 0001
+#define JMP_BASE    0x40  // Base for JMP instructions
+#define JEQ_BASE    0x50  // Base for JEQ instructions
 
-    // Extract the least significant byte (LSB) and most significant byte (MSB)
-    unsigned char lsb = value & 0xFF;       // Least significant byte (low byte)
-    unsigned char msb = (value >> 8) & 0xFF; // Most significant byte (high byte)
+// Define maximum labels and line size
+#define MAX_LABELS 100
+#define LINE_SIZE  50
 
-    // Write the bytes in little-endian order (LSB first, then MSB)
-    fwrite(&lsb, sizeof(unsigned char), 1, file);
-    fwrite(&msb, sizeof(unsigned char), 1, file);
-}
+// Structure to store label locations
+typedef struct {
+    char name[20];
+    int address;
+} Label;
 
-// Function to fill the file with 0xFF up to a specified length
-void fill_with_ff(FILE *file, long length) {
-    fseek(file, 0, SEEK_SET);  // Move to the beginning of the file
-    for (long i = 0; i < length; i++) {
-        unsigned char value = 0xFF;
-        fwrite(&value, sizeof(unsigned char), 1, file);
+Label labels[MAX_LABELS];
+int label_count = 0;
+
+// Helper function to convert a string to uppercase
+void to_uppercase(char *str) {
+    for (int i = 0; str[i]; i++) {
+        str[i] = toupper((unsigned char)str[i]);
     }
 }
 
-int main() {
-    // Open the .bin file for writing in binary mode
-    FILE *file = fopen("output.bin", "wb");
-    if (file == NULL) {
-        perror("Error opening file");
+// Function to add a label to the labels array
+void add_label(const char *name, int address) {
+    strcpy(labels[label_count].name, name);
+    labels[label_count].address = address;
+    label_count++;
+}
+
+// Function to find a label's address
+int find_label_address(const char *name) {
+    for (int i = 0; i < label_count; i++) {
+        if (strcmp(labels[i].name, name) == 0) {
+            return labels[i].address;
+        }
+    }
+    return -1;  // Label not found
+}
+
+// Function to get binary code for an instruction
+unsigned char get_instruction_code(const char *instruction, const char *operand1, const char *operand2, int *binary_extra) {
+    *binary_extra = 0;  // No extra data by default
+    
+    if (strcmp(instruction, "LOAD") == 0) {
+        if (strcmp(operand1, "A") == 0 && strcmp(operand2, "5") == 0) return LOAD_A_5;
+        if (strcmp(operand1, "B") == 0 && strcmp(operand2, "10") == 0) return LOAD_B_10;
+    }
+    else if (strcmp(instruction, "ADD") == 0 && strcmp(operand1, "A") == 0 && strcmp(operand2, "B") == 0) {
+        return ADD_A_B;
+    }
+    else if (strcmp(instruction, "STORE") == 0 && strcmp(operand1, "A") == 0) {
+        return STORE_A;
+    }
+    else if (strcmp(instruction, "JMP") == 0) {
+        *binary_extra = find_label_address(operand1);
+        if (*binary_extra != -1) return JMP_BASE;
+    }
+    else if (strcmp(instruction, "JEQ") == 0) {
+        *binary_extra = find_label_address(operand1);
+        if (*binary_extra != -1) return JEQ_BASE;
+    }
+
+    return 0xFF;  // Unknown instruction
+}
+
+int main(int argc, char *argv[]) {
+     if (argc != 3) {
+        fprintf(stderr, "Usage: %s <input.asm> <output.bin>\n", argv[0]);
         return 1;
     }
 
-    // Fill the file with 0xFF to a length of 32 bytes (for example)
-    fill_with_ff(file, 32);  // Adjust length as needed
+    FILE *asm_file = fopen(argv[1], "r");
+    if (asm_file == NULL) {
+        perror("Error opening input file");
+        return 1;
+    }
 
-    // Write multiple 16-bit values at specific addresses
-    write_little_endian_16_at_offset(file, 255, 0);     // Write 255 at address 0
-    write_little_endian_16_at_offset(file, 1024, 4);    // Write 1024 at address 4
-    write_little_endian_16_at_offset(file, 65535, 10);  // Write 65535 at address 10
-    write_little_endian_16_at_offset(file, 42, 16);     // Write 42 at address 16
-    write_little_endian_16_at_offset(file, 128, 20);    // Write 128 at address 20
+    FILE *bin_file = fopen(argv[2], "wb");
+    if (bin_file == NULL) {
+        perror("Error opening output file");
+        fclose(bin_file);
+        return 1;
+    }
 
-    // Close the file
-    fclose(file);
 
-    printf("Multiple values written to output.bin with unused space filled with FF.\n");
+    // First pass: Collect labels
+    char line[LINE_SIZE];
+    int address = 0;
+    while (fgets(line, sizeof(line), asm_file)) {
+        line[strcspn(line, "\n")] = 0;
+        to_uppercase(line);
+
+        // Check for label (format: LABEL:)
+        char *colon = strchr(line, ':');
+        if (colon) {
+            *colon = '\0';  // Remove colon
+            add_label(line, address);
+            continue;  // Skip to the next line
+        }
+
+        // Update address for each instruction
+        address++;
+    }
+
+    // Rewind file for second pass
+    rewind(asm_file);
+
+    // Second pass: Convert instructions to binary
+    while (fgets(line, sizeof(line), asm_file)) {
+        line[strcspn(line, "\n")] = 0;
+        to_uppercase(line);
+
+        // Skip labels
+        if (strchr(line, ':')) continue;
+
+        // Parse instruction and operands
+        char instruction[10], operand1[10], operand2[10];
+        int items_read = sscanf(line, "%s %[^,], %s", instruction, operand1, operand2);
+
+        if (items_read < 3) operand2[0] = '\0';
+
+        // Get binary code for the instruction
+        int binary_extra;
+        unsigned char binary_code = get_instruction_code(instruction, operand1, operand2, &binary_extra);
+
+        if (binary_code != 0xFF) {
+            // Write the main binary code
+            fwrite(&binary_code, sizeof(unsigned char), 1, bin_file);
+            if (binary_code == JMP_BASE || binary_code == JEQ_BASE) {
+                // Write the address for jump instructions
+                fwrite(&binary_extra, sizeof(unsigned char), 1, bin_file);
+            }
+            printf("Converted '%s' to binary: 0x%02X\n", line, binary_code);
+        } else {
+            printf("Unknown instruction: %s\n", line);
+        }
+    }
+
+    fclose(asm_file);
+    fclose(bin_file);
+    printf("Assembly to binary conversion completed.\n");
+
     return 0;
 }
