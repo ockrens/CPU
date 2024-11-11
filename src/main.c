@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <stdint.h>
 
 // Define binary codes for instructions
 #define LOAD_A_5    0x11  // Binary: 0001 0001
@@ -47,14 +48,35 @@ int find_label_address(const char *name) {
     }
     return -1;  // Label not found
 }
+int register_to_code(const char *reg) {
+    if (strcmp(reg, "R0") == 0) return 0;
+    if (strcmp(reg, "R1") == 0) return 1;
+    if (strcmp(reg, "R2") == 0) return 2;
+    if (strcmp(reg, "R3") == 0) return 3;
+    return -1; // Invalid register
+}
 
+// Function to convert an opcode to a 4-bit opcode number
+int opcode_to_code(const char *opcode) {
+    if (strcmp(opcode, "ADD") == 0) return 0;
+    if (strcmp(opcode, "SUB") == 0) return 1;
+    if (strcmp(opcode, "MUL") == 0) return 2;
+    if (strcmp(opcode, "DIV") == 0) return 3;
+    return -1; // Invalid opcode
+}
 // Function to get binary code for an instruction
 unsigned char get_instruction_code(const char *instruction, const char *operand1, const char *operand2, int *binary_extra) {
     *binary_extra = 0;  // No extra data by default
-    
+    uint16_t instructionOut;
+    uint16_t opcode_code;
     if (strcmp(instruction, "LOAD") == 0) {
-        if (strcmp(operand1, "A") == 0 && strcmp(operand2, "5") == 0) return LOAD_A_5;
-        if (strcmp(operand1, "B") == 0 && strcmp(operand2, "10") == 0) return LOAD_B_10;
+
+        opcode_code = 0001;
+        instructionOut = (atoi(operand2)<< 8) | ((register_to_code(operand1)) << 4) | opcode_code;            // 8 bits for the immediate value (first 8 bits)
+        
+        printf("code %04x\n",instructionOut);
+
+        return instructionOut;
     }
     else if (strcmp(instruction, "ADD") == 0 && strcmp(operand1, "A") == 0 && strcmp(operand2, "B") == 0) {
         return ADD_A_B;
@@ -70,8 +92,6 @@ unsigned char get_instruction_code(const char *instruction, const char *operand1
         *binary_extra = find_label_address(operand1);
         if (*binary_extra != -1) return JEQ_BASE;
     }
-
-    return 0xFF;  // Unknown instruction
 }
 
 int main(int argc, char *argv[]) {
@@ -132,16 +152,16 @@ int main(int argc, char *argv[]) {
 
         // Get binary code for the instruction
         int binary_extra;
-        unsigned char binary_code = get_instruction_code(instruction, operand1, operand2, &binary_extra);
+        int binary_code = get_instruction_code(instruction, operand1, operand2, &binary_extra);
 
         if (binary_code != 0xFF) {
             // Write the main binary code
-            fwrite(&binary_code, sizeof(unsigned char), 1, bin_file);
+            fwrite(&binary_code, sizeof(uint16_t), 1, bin_file);
             if (binary_code == JMP_BASE || binary_code == JEQ_BASE) {
                 // Write the address for jump instructions
-                fwrite(&binary_extra, sizeof(unsigned char), 1, bin_file);
+                fwrite(&binary_extra, sizeof(uint16_t), 1, bin_file);
             }
-            printf("Converted '%s' to binary: 0x%02X\n", line, binary_code);
+            printf("Converted '%s' to binary: 0x%04X\n", line, binary_code);
         } else {
             printf("Unknown instruction: %s\n", line);
         }
@@ -153,3 +173,5 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+
+
