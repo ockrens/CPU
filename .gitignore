@@ -1,4 +1,6 @@
-*.exe
 *.bin
 *.hex
 *.asm
+/out
+/build
+*.json
