@@ -1,5 +1,9 @@
 #include "..\include\main.h"
 
+
+
+// .\CPU-Assembler program.asm program.bin
+
 // Structure to store label locations
 typedef struct {
     char name[20];
@@ -93,18 +97,11 @@ int main(int argc, char *argv[]) {
         int binary_extra;
         uint16_t binary_code = get_instruction_code(instruction, operand1, operand2, &binary_extra);
 
-        if (binary_code != 0xFF) {
+        
             // Write the main binary code
             fwrite(&binary_code, sizeof(uint16_t), 1, bin_file);
-            printf("binary:%04x",binary_code);
-            if (binary_code == JMP_BASE || binary_code == JEQ_BASE) {
-                // Write the address for jump instructions
-                fwrite(&binary_extra, sizeof(uint16_t), 1, bin_file);
-            }
             printf("Converted '%s' to binary: 0x%04X\n", line, binary_code);
-        } else {
-            printf("Unknown instruction: %s\n", line);
-        }
+        
     }
 
     fclose(asm_file);
