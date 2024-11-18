@@ -1,6 +1,9 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+/* not implemented yet */ // this means its not inplemented in the hardware yet
+// .\CPU-Assembler program.asm program.bin
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -14,8 +17,6 @@
 
 // Define maximum labels and line size
 #define MAX_LABELS 100
-
-
 #define LINE_SIZE  50
 
 // Register mapping
@@ -29,18 +30,27 @@
 #define R7      0x07
 
 // Instruction mapping
-#define LOAD    0x0F    // not suported int the cpu at the moment
-#define JMP     0x01    // jump based on te lable given
-#define JMPA    0x02    // jump to absolute value
-#define JMPR    0x03    // jump based on register - maybe it does not have a register it auto detects that it is absolute or relative 
-#define JMPL    0x04    // jump relative to current state
-#define JMPRL   0xFF    // not implemented
-#define ALU     0x0F    // not implemented
+/* not implemented yet */#define LOAD    0x0F
+
+#define COUNT   0x00    // adds 2 to the pc                 does not have to have a encoding in the opcode it can be deactiveted on the JMP instructions
+#define JMPR    0x01    // jump relative to current state
+#define JMP     0x02    // jump based on te lable given     need to make it so it can jump with a immediate
+#define ZERO    0x03    // sets the to 0                    does not have to have a encoding in the opcode it only needs to be active when the rest circuit is active
+//  00 - count
+//  01 - add imm
+//  10 - load imm
+//  11 - zero
+
 
 // ALU defines
-#define ALU_ADD     0x0F    // not implemented
-#define ALU_SUB     0x0F    // not implemented
+/* not implemented yet */ #define ALU_ADD     0x0F   
+/* not implemented yet */ #define ALU_SUB     0x0F    
 
+// Structure to store label locations
+typedef struct {
+    char name[20];
+    int address;
+} Label;
 
 // Function to convert a register name to its corresponding code
 uint8_t register_to_code(const char *reg);
@@ -50,5 +60,8 @@ uint16_t get_instruction_code(const char *instruction, const char *operand1, con
 
 // Function to add a label to the labels array
 int find_label_address(const char *name);
+
+//checks if one of the opperands is register 1-7
+uint8_t check_if_reg(const char *reg);
 
 #endif

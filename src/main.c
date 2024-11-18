@@ -1,15 +1,6 @@
 #include "..\include\main.h"
 
-
-
-// .\CPU-Assembler program.asm program.bin
-
-// Structure to store label locations
-typedef struct {
-    char name[20];
-    int address;
-} Label;
-
+// lable init
 Label labels[MAX_LABELS];
 int label_count = 0;
 
@@ -20,14 +11,12 @@ void to_uppercase(char *str) {
     }
 }
 
-// Function to add a label to the labels array
 void add_label(const char *name, int address) {
     strcpy(labels[label_count].name, name);
     labels[label_count].address = address;
     label_count++;
 }
 
-// Function to find a label's address
 int find_label_address(const char *name) {
     for (int i = 0; i < label_count; i++) {
         if (strcmp(labels[i].name, name) == 0) {
