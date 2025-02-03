@@ -30,12 +30,12 @@
 #define R7      0x07
 
 // Instruction mapping
-/* not implemented yet */#define LOAD    0x0F
+/* not implemented yet */#define LDI    0x04
 
 #define COUNT   0x00    // adds 2 to the pc                 does not have to have a encoding in the opcode it can be deactiveted on the JMP instructions
 #define JMPR    0x01    // jump relative to current state
 #define JMP     0x02    // jump based on te lable given     need to make it so it can jump with a immediate
-#define ZERO    0x03    // sets the to 0                    does not have to have a encoding in the opcode it only needs to be active when the rest circuit is active
+#define ZERO    0x03    // sets the to 0                    does not have to have a encoding in the opcode it only needs to be active when the rest circuit is active !!!!! i can disable the mux to make it zero. way better option becouse its a seperate signal and dont need an encoding for it
 //  00 - count
 //  01 - add imm
 //  10 - load imm

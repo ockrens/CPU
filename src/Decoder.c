@@ -22,8 +22,8 @@ uint16_t get_instruction_code(const char *instruction, const char *operand1, con
     *binary_extra = 0;  // No extra data by default
     uint16_t instructionOut;
 
-    if (strcmp(instruction, "LOAD") == 0) {
-        instructionOut = (atoi(operand2)<< 8) | (register_to_code(operand1) << 4) | LOAD;            // 8 bits for the immediate value (first 8 bits)
+    if (strcmp(instruction, "LDI") == 0) {
+        instructionOut = (atoi(operand2)<< 8) | (register_to_code(operand1) << 4) | LDI;            // 8 bits for the immediate value (first 8 bits)
         return instructionOut;
     }
 
