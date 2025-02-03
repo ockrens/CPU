@@ -22,8 +22,8 @@ uint16_t get_instruction_code(const char *instruction, const char *operand1, con
     *binary_extra = 0;  // No extra data by default
     uint16_t instructionOut;
 
-    if (strcmp(instruction, "LOAD") == 0) {
-        instructionOut = (atoi(operand2)<< 8) | (register_to_code(operand1) << 4) | LOAD;            // 8 bits for the immediate value (first 8 bits)
+    if (strcmp(instruction, "LDI") == 0) {
+        instructionOut = (atoi(operand2)<< 8) | (register_to_code(operand1) << 4) | LDI;            // 8 bits for the immediate value (first 8 bits)
         return instructionOut;
     }
 
@@ -53,7 +53,7 @@ uint16_t get_instruction_code(const char *instruction, const char *operand1, con
         return STORE_A;
     }
     else if (strcmp(instruction, "JEQ-example") == 0) {
-        *binary_extra = find_label_address(operand1);
+        *binary_extra = GetLabel(operand1);
         if (*binary_extra != -1) return JEQ_BASE;
     }
 }

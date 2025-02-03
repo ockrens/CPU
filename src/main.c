@@ -13,7 +13,7 @@ void to_uppercase(char *str) {
 
 void add_label(const char *name, int address) {
     strcpy(labels[label_count].name, name);
-    labels[label_count].address = address;
+    labels[label_count].address = address * 2;
     label_count++;
 }
 
@@ -44,7 +44,6 @@ int main(int argc, char *argv[]) {
         fclose(bin_file);
         return 1;
     }
-
 
     // First pass: Collect labels
     char line[LINE_SIZE];
@@ -97,7 +96,7 @@ int main(int argc, char *argv[]) {
     fclose(bin_file);
     printf("Assembly to binary conversion completed.\n");
 
-    return 0;
+    
 }
 
 
