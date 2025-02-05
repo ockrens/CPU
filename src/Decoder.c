@@ -53,7 +53,7 @@ uint16_t get_instruction_code(const char *instruction, const char *operand1, con
         return STORE_A;
     }
     else if (strcmp(instruction, "JEQ-example") == 0) {
-        *binary_extra = GetLabel(operand1);
+        *binary_extra = find_label_address(operand1);
         if (*binary_extra != -1) return JEQ_BASE;
     }
 }
