@@ -2,10 +2,10 @@
  * @file Functions.c
  * @author Rens J. Ockhuijsen
  * @date 2025-02-07
- * @brief this is where most of the small functions are located to clean the main file
+ * @brief This is where most of the small functions are located to clean the main file.
  */
 
-#include "..\include\remake.h"
+#include "..\include\main.h"
 
 
 static Label labels[MAX_LABELS];

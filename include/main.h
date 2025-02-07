@@ -1,50 +1,37 @@
-#ifndef MAIN_H
-#define MAIN_H
+/**
+ * @file main.h
+ * @author Rens J. Ockhuijsen
+ * @date 2025-02-07
+ * @brief This is where most things are defined.
+ */
 
-/* not implemented yet */ // this means its not inplemented in the hardware yet
-// .\CPU-Assembler program.asm program.bin
+#ifndef main_h
+#define main_h
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdint.h>
+#include <math.h>
+#include "..\include\decoder_def.h"
 
-// Define binary codes for instructions
-#define ADD_A_B     0x21  // Binary: 0010 0001
-#define STORE_A     0x31  // Binary: 0011 0001
-#define JEQ_BASE    0x50  // Base for JEQ instructions
+/*-------------------------------------------------------------------------
+----------------------- Memory settings -----------------------------------
+-------------------------------------------------------------------------*/
 
-// Define maximum labels and line size
-#define MAX_LABELS 100
-#define LINE_SIZE  50
+// The value that every unused address should be (like a HLT).
+#define DefaultValue 0x00
 
-// Register mapping
-#define R0      0x00
-#define R1      0x01
-#define R2      0x02
-#define R3      0x03
-#define R4      0x04
-#define R5      0x05
-#define R6      0x06
-#define R7      0x07
+// How many bits the instuctions set is.
+typedef uint16_t InstructionLength;
 
-// Instruction mapping
-/* not implemented yet */#define LDI    0x04
+// How many bits the memory is. its defined to make it compatible with other memory types.
+typedef uint8_t MemoryWith;        
 
-#define COUNT   0x00    // adds 2 to the pc                 does not have to have a encoding in the opcode it can be deactiveted on the JMP instructions
-#define JMPR    0x01    // jump relative to current state
-#define JMP     0x02    // jump based on te lable given     need to make it so it can jump with a immediate
-#define ZERO    0x03    // sets the to 0                    does not have to have a encoding in the opcode it only needs to be active when the rest circuit is active !!!!! i can disable the mux to make it zero. way better option becouse its a seperate signal and dont need an encoding for it
-//  00 - count
-//  01 - add imm
-//  10 - load imm
-//  11 - zero
-
-
-// ALU defines
-/* not implemented yet */ #define ALU_ADD     0x0F   
-/* not implemented yet */ #define ALU_SUB     0x0F    
+/*-------------------------------------------------------------------------
+----------------------- Structs and variables -----------------------------
+-------------------------------------------------------------------------*/
 
 // Structure to store label locations
 typedef struct {
@@ -52,16 +39,55 @@ typedef struct {
     int address;
 } Label;
 
-// Function to convert a register name to its corresponding code
-uint8_t register_to_code(const char *reg);
+// The ammount af addresses the memory has.
+#define MemorySize 20 
 
-// Function to get the binary code for an instruction
-uint16_t get_instruction_code(const char *instruction, const char *operand1, const char *operand2, int *binary_extra);
+// Makes the buffer
+MemoryWith buffer[MemorySize];
 
-// Function to add a label to the labels array
-int find_label_address(const char *name);
+/*-------------------------------------------------------------------------
+----------------------- Function defenitions ------------------------------
+-------------------------------------------------------------------------*/
 
-//checks if one of the opperands is register 1-7
-uint8_t check_if_reg(const char *reg);
+// Writes the buffer to the output file.
+void WriteDocument(FILE *OutputFile);
+
+// Reads the lables in the input file.
+void ReadLabels(FILE *InputFile);
+
+// Reads the lines and decodes them to binary.
+void ProcessFile(FILE *InputFile);
+
+// Gets the address for a given label.
+int GetLabel(const char *name);
+
+// Binds a adress to a given label name.
+void AddLabel(const char *name, int address);
+
+// Coverts the string to have all uppercase. this is so you dont need to type the assembly in uppercase if you want.
+void ToUppercase(char *str);
+
+// Function to get the binary code for a given nstruction.
+InstructionLength get_instruction_code(const char *instruction, const char *operand1, const char *operand2, int *binary_extra);
+
 
 #endif
+
+/*-------------------------------------------------------------------------
+----------------------- Temporary defenitions -----------------------------
+-------------------------------------------------------------------------*/
+
+// Define binary codes for instructions
+#define ADD_A_B     0x21  // Binary: 0010 0001
+#define STORE_A     0x31  // Binary: 0011 0001
+#define JEQ_BASE    0x50  // Base for JEQ instructions
+
+// Register mapping
+#define MAX_LABELS 100
+#define LINE_SIZE  50
+
+
+// #define MemorySize 32768 // is half of the memoryspace. the other half will be ram
+
+
+

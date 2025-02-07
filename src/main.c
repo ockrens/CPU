@@ -2,10 +2,11 @@
  * @file main.c
  * @author Rens J. Ockhuijsen
  * @date 2025-02-07
- * @brief this is the file where the gluing happens
+ * @brief This is the file where the gluing happens.
  */
 
-#include "..\include\remake.h"
+#include "..\include\main.h"
+
 
 int main(int argc, char *argv[]) {
      memset(buffer, DefaultValue, MemorySize); // writes the default value to the buffer

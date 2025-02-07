@@ -2,11 +2,11 @@
  * @file Decoder.c
  * @author Rens J. Ockhuijsen
  * @date 2025-02-07
- * @brief here are the definitions for how the strings turn in to the binary
+ * @brief Here are the definitions for how the strings turn in to the binary.
  */
 
 
-#include "..\include\remake.h"
+#include "..\include\main.h"
 
 uint8_t register_to_code(const char *reg) {
     if (strcmp(reg, "R0") == 0) return R0;
