@@ -51,6 +51,10 @@ typedef struct {
     int address;
 } Label;
 
+
+
+MemoryWith buffer[MemorySize];
+
 //Writes the buffer to the output file
 void WriteDocument(FILE *OutputFile);
 
@@ -59,6 +63,11 @@ void ReadLabels(FILE *InputFile);
 
 //Reads the lines and decodes them to binary
 void ProcessFile(FILE *InputFile);
+
+int GetLabel(const char *name);
+
+void AddLabel(const char *name, int address);
+void ToUppercase(char *str);
 
 // Function to get the binary code for an instruction
 InstructionLength get_instruction_code(const char *instruction, const char *operand1, const char *operand2, int *binary_extra);

@@ -1,4 +1,12 @@
-#include "..\include\main.h"
+/**
+ * @file Decoder.c
+ * @author Rens J. Ockhuijsen
+ * @date 2025-02-07
+ * @brief here are the definitions for how the strings turn in to the binary
+ */
+
+
+#include "..\include\remake.h"
 
 uint8_t register_to_code(const char *reg) {
     if (strcmp(reg, "R0") == 0) return R0;
@@ -18,7 +26,7 @@ uint8_t check_if_reg(const char *reg){
 }
 
 
-uint16_t get_instruction_code(const char *instruction, const char *operand1, const char *operand2, int *binary_extra) {
+InstructionLength get_instruction_code(const char *instruction, const char *operand1, const char *operand2, int *binary_extra) {
     *binary_extra = 0;  // No extra data by default
     uint16_t instructionOut;
 
@@ -30,7 +38,7 @@ uint16_t get_instruction_code(const char *instruction, const char *operand1, con
 
     else if (strcmp(instruction, "JMP") == 0) {
          /* not implemented yet */ if(check_if_reg(operand1)) instructionOut = (register_to_code(operand1)<< 4) | JMP; // if the defined string for operand 1 is between R1-R7 it will jump to the value of the register.
-        else instructionOut = (find_label_address(operand1)<< 8)|JMP; // if operand is not a register it will jump using the immediate.
+        else instructionOut = (GetLabel(operand1)<< 8) | JMP; // if operand is not a register it will jump using the immediate.
         return instructionOut;
     }
 
@@ -53,7 +61,7 @@ uint16_t get_instruction_code(const char *instruction, const char *operand1, con
         return STORE_A;
     }
     else if (strcmp(instruction, "JEQ-example") == 0) {
-        *binary_extra = find_label_address(operand1);
+        *binary_extra = GetLabel(operand1);
         if (*binary_extra != -1) return JEQ_BASE;
     }
 }
