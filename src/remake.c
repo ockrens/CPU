@@ -94,27 +94,28 @@ void ProcessFile(FILE *file){
         // Get binary code for the instruction
         int binary_extra;
         InstructionLength DecodeResult = get_instruction_code(instruction, operand1, operand2, &binary_extra); // verander instructie naam
+        printf("Decode Result: %0X Mem: %d ", DecodeResult, sizeof(MemoryWith));
         double SizeCheck = sizeof(InstructionLength) / sizeof(MemoryWith);
         if (fmod(SizeCheck, 1.0) == 0.0) {  
-            printf("%.2f Correct settings\n", SizeCheck);
            switch ((int)SizeCheck){
             case 1:
                 buffer[address] = DecodeResult;
             break;
             case 2:
                 FirstPart    = DecodeResult;
-                SecondPart   = (DecodeResult << sizeof(MemoryWith));
+                SecondPart   = DecodeResult >> (sizeof(MemoryWith) * 8);
                 buffer[address] = FirstPart;
                 address++;
                 buffer[address] = SecondPart;
                 address++;
+                printf("1: %02X, 2: %02X\n", FirstPart, SecondPart);
                 
             break;
             case 4:
                 FirstPart    = DecodeResult;
-                SecondPart   = (DecodeResult << sizeof(MemoryWith));
-                ThirdPart    = (DecodeResult << sizeof(MemoryWith) * 2);
-                FourthPart   = (DecodeResult << sizeof(MemoryWith)* 3);
+                SecondPart   = DecodeResult >> (sizeof(MemoryWith) * 8);
+                ThirdPart    = DecodeResult >> (sizeof(MemoryWith) * 8 * 2);
+                FourthPart   = DecodeResult >> (sizeof(MemoryWith) * 8 * 3);
                 buffer[address] = FirstPart;
                 address++;
                 buffer[address] = SecondPart;
@@ -166,13 +167,13 @@ int main(int argc, char *argv[]) {
     ReadLabels(asm_file);
     ProcessFile(asm_file);
     WriteDocument(bin_file);
-    // prints the contents of the buffer
-    for ( int i = 0; i < MemorySize; i++){
-        printf("value 0x%02X\n", buffer[i]);
-    }
-    fclose(asm_file);
-    fclose(bin_file);
-    return 0;
+//     // prints the contents of the buffer
+//     for ( int i = 0; i < MemorySize; i++){
+//         printf("value 0x%02X\n", buffer[i]);
+//     }
+//     fclose(asm_file);
+//     fclose(bin_file);
+//     return 0;
 }
 
 /*-------------------------------------------------------------------------------
