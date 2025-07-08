@@ -16,7 +16,6 @@ uint8_t register_to_code(const char *reg) {
     if (strcmp(reg, "R4") == 0) return R4;
     if (strcmp(reg, "R5") == 0) return R5;
     if (strcmp(reg, "R6") == 0) return R6;
-    if (strcmp(reg, "R7") == 0) return R7;
     return -1; // Invalid register
 }
 
@@ -31,7 +30,7 @@ InstructionLength get_instruction_code(const char *instruction, const char *oper
     uint16_t instructionOut;
 
     if (strcmp(instruction, "LDI") == 0) {
-        instructionOut = (atoi(operand2)<< 8) | (register_to_code(operand1) << 4) | LDI;            // 8 bits for the immediate value (first 8 bits)
+        instructionOut = (atoi(operand2)<< 8) | (register_to_code(operand1) << 4) | LDI;// 8 bits for the immediate value (first 8 bits)
         return instructionOut;
     }
 
@@ -47,6 +46,10 @@ InstructionLength get_instruction_code(const char *instruction, const char *oper
 
         /* not implemented yet */if(check_if_reg(operand1)) instructionOut = (atoi(operand2)<< 8)|(register_to_code(operand1)<< 4) | JMPR; // if the defined string for operand 1 is between R1-R7 it will jump to the value of the register.
         else instructionOut = ((atoi(operand1) << 8)|JMPR); // if operand is not a register it will jump using the immediate.
+        return instructionOut;
+    }
+    else if (strcmp(instruction, "MOV") == 0) {
+        instructionOut = (register_to_code(operand2)<< 4) | (register_to_code(operand1) << 8) | MOV;// 8 bits for the immediate value (first 8 bits)
         return instructionOut;
     }
 

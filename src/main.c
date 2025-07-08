@@ -31,15 +31,14 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-
     ReadLabels(asm_file);
     ProcessFile(asm_file);
     WriteDocument(bin_file);
-//     // prints the contents of the buffer
-//     for ( int i = 0; i < MemorySize; i++){
-//         printf("value 0x%02X\n", buffer[i]);
-//     }
-//     fclose(asm_file);
-//     fclose(bin_file);
-//     return 0;
+    // prints the contents of the buffer
+    // for ( int i = 0; i < MemorySize; i++){
+    //     printf("value 0x%02X\n", buffer[i]);
+    // }
+    // fclose(asm_file);
+    // fclose(bin_file);
+    return 0;
 }

@@ -1,6 +1,3 @@
 # CPU
 this is the info page
-
-./Assembler program.asm program.bin
-
-gcc -o Assembler src/main.c
+gcc -o CPU-Assembler src/main.c

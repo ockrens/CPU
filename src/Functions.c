@@ -99,14 +99,14 @@ void ProcessFile(FILE *file){
         // Get binary code for the instruction
         int binary_extra;
         InstructionLength DecodeResult = get_instruction_code(instruction, operand1, operand2, &binary_extra); // verander instructie naam
-        printf("Decode Result: %0X Mem: %d ", DecodeResult, sizeof(MemoryWith));
+        printf("Decode Result: %04X ", DecodeResult);
         double SizeCheck = sizeof(InstructionLength) / sizeof(MemoryWith);
         if (fmod(SizeCheck, 1.0) == 0.0) {  
            switch ((int)SizeCheck){
             case 1:
                 buffer[address] = DecodeResult;
             break;
-            case 2:
+            case 2: 
                 FirstPart    = DecodeResult;
                 SecondPart   = DecodeResult >> (sizeof(MemoryWith) * 8);
                 buffer[address] = FirstPart;
