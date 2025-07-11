@@ -49,7 +49,27 @@ InstructionLength get_instruction_code(const char *instruction, const char *oper
         return instructionOut;
     }
     else if (strcmp(instruction, "MOV") == 0) {
-        instructionOut = (register_to_code(operand2)<< 4) | (register_to_code(operand1) << 8) | MOV;// 8 bits for the immediate value (first 8 bits)
+        instructionOut = (register_to_code(operand2)<< 4) | (register_to_code(operand1) << 8) | MOV; // MOV from A to B
+        return instructionOut;
+    }
+
+
+    // ALU operations
+
+      else if (strcmp(instruction, "ADD") == 0) {
+        instructionOut = (register_to_code(operand2)<< 8) | (register_to_code(operand1) << 4) | ALU | (ADD << 12);// ADD A + B
+        return instructionOut;
+    }
+    else if (strcmp(instruction, "SUB") == 0) {
+        instructionOut = (register_to_code(operand2)<< 8) | (register_to_code(operand1) << 4) | ALU | (SUB << 12);// SUB A - B 
+        return instructionOut;
+    }
+    else if (strcmp(instruction, "ADDC") == 0) {
+        instructionOut = (register_to_code(operand2)<< 8) | (register_to_code(operand1) << 4) | ALU | (ADDC << 12);// ADD A + B + C
+        return instructionOut;
+    }
+    else if (strcmp(instruction, "SUBC") == 0) {
+        instructionOut = (register_to_code(operand2)<< 8) | (register_to_code(operand1) << 4) | ALU | (SUBC << 12);// SUB A - B + C
         return instructionOut;
     }
 

@@ -25,9 +25,17 @@
 /**
  * x0 is immediate
  * x1 is no immediate
- * 1x is move
- * 0x is alu
+ * 0x is move
+ * 1x is alu
  */
-#define LDI     0x08    // load immediate value into register 
-#define MOV     0x0C    // move value from one register to another
+#define LDI     0x00    // load immediate value into register 
+#define MOV     0x04    // move value from one register to another
+#define ALU     0x0c    // ALU operation
+#define ALUI    0x08    // ALU immediate operation
+
+// alu operations
+#define ADD     0x0    // add
+#define ADDC    0x1    // add with carry
+#define SUB     0x2    // subtract
+#define SUBC    0x3    // subtract with carry
 #endif
