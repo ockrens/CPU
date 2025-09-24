@@ -1,3 +1,7 @@
 # CPU
 this is the info page
-gcc -o CPU-Assembler src/main.c
+cmake --build build
+.\CPU-Assembler.exe test.asm test.bin
+
+
+galette (filename).pld

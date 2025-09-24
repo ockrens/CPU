@@ -82,6 +82,9 @@ void ProcessFile(FILE *file){
     MemoryWith SecondPart;
     MemoryWith ThirdPart;
     MemoryWith FourthPart;
+
+    char instruction[10], operand1[10], operand2[10];
+
     // Second pass: Convert instructions to binary
     while (fgets(line, sizeof(line), file)) {
         line[strcspn(line, "\n")] = 0;
@@ -90,8 +93,7 @@ void ProcessFile(FILE *file){
         // Skip labels
         if (strchr(line, ':')) continue;
 
-        // Parse instruction and operands
-        char instruction[10], operand1[10], operand2[10];
+        // Parse instruction and operands 
         int items_read = sscanf(line, "%s %[^,], %s", instruction, operand1, operand2);
 
         if (items_read < 3) operand2[0] = '\0';

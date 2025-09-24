@@ -57,7 +57,7 @@ InstructionLength get_instruction_code(const char *instruction, const char *oper
     // ALU operations
 
       else if (strcmp(instruction, "ADD") == 0) {
-        instructionOut = (register_to_code(operand2)<< 8) | (register_to_code(operand1) << 4) | ALU | (ADD << 12);// ADD A + B
+        instructionOut = (register_to_code(operand1)<< 8) | (register_to_code(operand2) << 4) | ALU | (ADD << 12);// ADD A + B
         return instructionOut;
     }
     else if (strcmp(instruction, "SUB") == 0) {

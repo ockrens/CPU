@@ -40,7 +40,7 @@ typedef struct {
 } Label;
 
 // The ammount af addresses the memory has.
-#define MemorySize 100
+#define MemorySize 150
 
 // Makes the buffer
 MemoryWith buffer[MemorySize];
