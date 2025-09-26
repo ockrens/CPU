@@ -5,7 +5,7 @@
  * @brief Here are the definitions for how the strings turn in to the binary.
  */
 
-
+ 
 #include "..\include\main.h"
 
 uint8_t register_to_code(const char *reg) {
