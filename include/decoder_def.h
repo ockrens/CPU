@@ -44,7 +44,7 @@
 /** 
     LEFT HAND SIDE
  * 00XX   ZERO   
- * 01XX   UNCHANGED
+ * 01XX   RD
  * 10XX   SHL
  * 11XX   SHR
  */
@@ -52,9 +52,7 @@
 #define SUB         0x5    // 0101  subtract
 #define ADDC        0x6    // 0110  add with carry
 #define SUBC        0x7    // 0111  subtract with carry
-#define ZERO        0x0    // 0000
-#define UNCHANGED   0x1    // 0100
-#define SHL         0x2    // 1000 Make it so it takes a register with the value 0 on the right hand side
-#define SHR         0x3    // 1100 Make it so it takes a register with the value 0 on the right hand side
+#define SHL         0x8    // 1000 Make it so it takes a register with the value 0 on the right hand side
+#define SHR         0xC    // 1100 Make it so it takes a register with the value 0 on the right hand side
 
 #endif

@@ -27,7 +27,7 @@ uint8_t check_if_reg(const char *reg){
 
 InstructionLength get_instruction_code(const char *instruction, const char *operand1, const char *operand2, int *binary_extra) {
     *binary_extra = 0;  // No extra data by default
-    uint16_t instructionOut;
+    InstructionLength instructionOut;
 
     if (strcmp(instruction, "LDI") == 0) {
         instructionOut = (atoi(operand2)<< 8) | (register_to_code(operand1) << 4) | LDI;// 8 bits for the immediate value (first 8 bits)
@@ -72,7 +72,14 @@ InstructionLength get_instruction_code(const char *instruction, const char *oper
         instructionOut = (register_to_code(operand2)<< 8) | (register_to_code(operand1) << 4) | ALU | (SUBC << 12);// SUB A - B + C
         return instructionOut;
     }
-
+    else if (strcmp(instruction, "SHL") == 0) {
+        instructionOut = (register_to_code(operand1) << 4) | ALU | (SHL << 12);// SUB A - B + C
+        return instructionOut;
+    }
+    else if (strcmp(instruction, "SHR") == 0) {
+        instructionOut = (register_to_code(operand1) << 4) | ALU | (SHR << 12);// SUB A - B + C
+        return instructionOut;
+    }
 
 
 
