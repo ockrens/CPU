@@ -1,23 +1,25 @@
-CarryOP:        ShiftOP
-Zero            LHS
-One             Zero
-Carryflag       SHL
-Carryflag       SHR
+CarryOP:                 ShiftOP
+Zero           00        LHS     01
+One            01        Zero    00
+Carryflag      10        SHL     10
+Carryflag      11        SHR     11
 
-OPCode        ShiftOP     CarryOP     Inversion
-ADD     0000  LHS         Zero        0
-ADDC    0001  LHS         Carryflag   0
-SUB     0010  LHS         One         1
-SUBC    0011  LHS         Carryflag   1
-NEG     0100
-NOT     0101
-AND     0110 
-OR      0111
-SHL     1000  SHL         Zero        0
-SHLC    1001  SHL         Carryflag   0
-SHR     1010  SHR         Zero        0
-SHRC    1011  SHR         Carryflag   0
-        1100
-        1101
-        1110
-        1111
+OPCode        ShiftOP           CarryOP    
+ADD     0000  LHS       01         Zero         00       
+ADDC    0001  LHS       01         Carryflag    10   
+SUB     0010  LHS       01         One          01         
+SUBC    0011  LHS       01         Carryflag    10   
+SHL     0100  SHL       10         Zero         00     
+SHLC    0101  SHL       10         Carryflag    10 
+SHR     0110  SHR       11         Zero         00      
+SHRC    0111  SHR       11         Carryflag    10   
+NEG     
+NOT     
+AND     
+OR            
+
+ SOP0 = /L3 * /L2 + /L3 * L2 * L1
+ SOP1 = /L3 * L2
+
+ COP0 = /L3 * /L2 * L1 * /L0 
+ COP1 = L0     

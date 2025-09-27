@@ -28,31 +28,19 @@
  * 0x is move
  * 1x is alu
  */
-#define LDI     0x00    // 0x0000 load immediate value into register 
-#define MOV     0x04    // 0x0100 move value from one register to another
-#define ALU     0x0C    // 0x1100 ALU operation
+#define LDI     0x00    // 0000 load immediate value into register 
+#define MOV     0x04    // 0100 move value from one register to another
+#define ALU     0x0C    // 1100 ALU operation
+#define HLT     0x0003  // 0x1111 halt the program
 
 // alu operations
-
-/** 
-    RIGHT HAND SIDE
- * XX00   ADD
- * XX01   SUB
- * XX10   ADDC
- * XX11   SUBC
- */
-/** 
-    LEFT HAND SIDE
- * 00XX   ZERO   
- * 01XX   RD
- * 10XX   SHL
- * 11XX   SHR
- */
-#define ADD         0x4    // 0100  add
-#define SUB         0x5    // 0101  subtract
-#define ADDC        0x6    // 0110  add with carry
-#define SUBC        0x7    // 0111  subtract with carry
-#define SHL         0x8    // 1000 Make it so it takes a register with the value 0 on the right hand side
-#define SHR         0xC    // 1100 Make it so it takes a register with the value 0 on the right hand side
+#define ADD     0x00    // 0001
+#define ADDC    0x01    // 0001
+#define SUB     0x02    // 0010
+#define SUBC    0x03    // 0011
+#define SHL     0x04    // 0100
+#define SHLC    0x05    // 0101
+#define SHR     0x06    // 0110
+#define SHRC    0x07    // 0111
 
 #endif
