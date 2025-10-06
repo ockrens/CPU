@@ -42,5 +42,11 @@
 #define SHLC    0x05    // 0101
 #define SHR     0x06    // 0110
 #define SHRC    0x07    // 0111
-
+#define SHRA    0x08    // 1000
+#define NEG     0x09    // 1001 
+#define NOT     0x0A    // 1010
+#define AND     0x0B    // 1011
+#define OR      0x0C    // 1100 
+#define XOR     0x0D    // 1101
+#define FSWAP   0x0E    // 1110
 #endif

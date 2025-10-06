@@ -27,10 +27,17 @@ uint8_t ALUOp_to_code(const char *alu_op) {
     if (strcmp(alu_op, "SHR") == 0) return SHR;
     if (strcmp(alu_op, "SHLC") == 0) return SHLC;
     if (strcmp(alu_op, "SHRC") == 0) return SHRC;
+    if (strcmp(alu_op, "SHRA") == 0) return SHRA;
+    if (strcmp(alu_op, "NEG") == 0) return NEG;
+    if (strcmp(alu_op, "NOT") == 0) return NOT;
+    if (strcmp(alu_op, "AND") == 0) return AND;
+    if (strcmp(alu_op, "OR") == 0) return OR;
+    if (strcmp(alu_op, "XOR") == 0) return XOR;
+    if (strcmp(alu_op, "FSWAP") == 0) return FSWAP;
     return -1; // Invalid ALU operation
 }
 uint8_t check_if_alu_op(const char *alu_op){
-    if (strcmp(alu_op, "ADD") == 0 |strcmp(alu_op, "SUB") == 0 |strcmp(alu_op, "ADDC") == 0 |strcmp(alu_op, "SUBC") == 0 |strcmp(alu_op, "SHL") == 0 |strcmp(alu_op, "SHR") == 0|strcmp(alu_op, "SHLC") == 0 |strcmp(alu_op, "SHRC") == 0) return 1;
+    if (strcmp(alu_op, "ADD") == 0 |strcmp(alu_op, "SUB") == 0 |strcmp(alu_op, "ADDC") == 0 |strcmp(alu_op, "SUBC") == 0 |strcmp(alu_op, "SHL") == 0 |strcmp(alu_op, "SHR") == 0|strcmp(alu_op, "SHLC") == 0 |strcmp(alu_op, "SHRC") == 0 |strcmp(alu_op, "SHRA") == 0 |strcmp(alu_op, "NEG") == 0 |strcmp(alu_op, "NOT") == 0 |strcmp(alu_op, "AND") == 0|strcmp(alu_op, "OR") == 0 |strcmp(alu_op, "XOR") == 0 |strcmp(alu_op, "FSWAP") == 0) return 1;
     else return 0;
 }
 uint8_t check_if_reg(const char *reg){
@@ -73,11 +80,11 @@ InstructionLength get_instruction_code(const char *instruction, const char *oper
     // ALU operations
 
     else if (check_if_alu_op(instruction) == 1) {
-        if(strcmp(instruction, "SHL") == 0 |strcmp(instruction, "SHR") == 0|strcmp(instruction, "SHLC") == 0 |strcmp(instruction, "SHRC") == 0){
+        if(strcmp(instruction, "SHL") == 0 |strcmp(instruction, "SHR") == 0|strcmp(instruction, "SHLC") == 0 |strcmp(instruction, "SHRC") == 0 |strcmp(instruction, "NEG") == 0 |strcmp(instruction, "NOT") == 0 |strcmp(instruction, "FSWAP") == 0){
             instructionOut = (register_to_code(operand1)<< 4) | (ALUOp_to_code(instruction) << 12) | ALU;
         }
         else{
-            instructionOut = (register_to_code(operand1)<< 8) | (register_to_code(operand2) << 4) | (ALUOp_to_code(instruction) << 12) | ALU;
+            instructionOut = (register_to_code(operand1)<< 4) | (register_to_code(operand2) << 8) | (ALUOp_to_code(instruction) << 12) | ALU;
         }
         return instructionOut;
     }

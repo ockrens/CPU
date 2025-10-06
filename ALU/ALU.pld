@@ -1,18 +1,25 @@
 GAL16V8
 ALU decoder
 
-Clock  L0    L1    L2    L3    NC    NC    NC    NC   GND
-/OE   NC    NC    NC    NC    SOP1   SOP0  COP1  COP0 VCC
+NC      A0      A1      A2      A3      NC      NC      NC      NC      GND
+/OE     SOP1    SOP0    COP1    COP0    L3      L2      L1      L0      VCC
 
- SOP0 = /L3 * /L2 + /L3 * L2 * L1
- SOP1 = /L3 * L2
+ SOP0 = /A3 * /A2 + /A3 * A2 * A1 + A3 * /A2 * /A1 * /A0
+ SOP1 = /A3 * A2 + A3 * /A2 * /A1 * /A0
 
- COP0 = /L3 * /L2 * L1 * /L0 
- COP1 = L0 
+ COP0 = /A3 * /A2 * A0 + /A3 * /A2 * A1 * /A0 + /A3 * A2 * A0 + A3 * /A2 * /A1 * A0
+ COP1 = /A3 * A0 + A3 * /A2 * /A1 * /A0
+
+ L0 = A3 * /A2 * /A1 * A0 + A3 * /A2 * A1 * /A0 + A3 * A2 * A1 * /A0
+ L1 = /A3 * /A2 + A3 * A2 * /A1 + A3 * /A2 * /A1 * A0 + A3 * /A2 * A1 * /A0 + A3 * A2 * A1 * /A0
+ L2 = A3 * A2 * /A1 + A3 * A2 * A1 * /A0
+ L3 = /A3 * /A2 + A3 * /A2 * A1 * A0 + A3 * A2 * /A1 * /A0 + A3 * A2 * A1 * /A0
+
+
+
 DESCRIPTION
 
 combinatorial logic for the alu opcode to generate control signals.
-
 
 
 
