@@ -1,0 +1,39 @@
+                ShiftOP:            CarryOP:            logic Unit:
+                Zero    00          Zero        00      Zero    0000
+                LHS     01          One         01      Not LHS 0011
+                SHL     10          Sign        10      Not RHS 0101
+                SHR     11          Carryflag   11      XOR     0110
+                                                        AND     1000
+                                                        RHS     1010
+                                                        LHS     1100
+                                                        OR      1110
+                                                        FSwap   1111      
+                                    
+OPCode          ShiftOP              CarryOP            logic Unit
+ADD     0000    LHS     01         Zero         00      RHS     1010
+ADDC    0001    LHS     01         Carryflag    11      RHS     1010   
+SUB     0010    LHS     01         One          01      RHS     1010         
+SUBC    0011    LHS     01         Carryflag    11      RHS     1010  
+SHL     0100    SHL     10         Zero         00      Zero    0000     
+SHLC    0101    SHL     10         Carryflag    11      Zero    0000 
+SHR     0110    SHR     11         Zero         00      Zero    0000
+SHRC    0111    SHR     11         Carryflag    11      Zero    0000
+SHRA    1000    SHR     11         Sign         10      Zero    0000
+NEG     1001    Zero    00         One          01      Not LHS 0011
+NOT     1010    Zero    00         Zero         00      Not LHS 0011
+AND     1011    Zero    00         Zero         00      AND     1000
+OR      1100    Zero    00         Zero         00      OR      1110
+XOR     1101    Zero    00         Zero         00      XOR     0110
+FSWAP   1110    Zero    00         Zero         00      FSWAP   1111
+
+ SOP0 = /A3 * /A2 + /A3 * A2 * A1 + A3 * /A2 * /A1 * /A0
+ SOP1 = /A3 * A2 + A3 * /A2 * /A1 * /A0
+
+ COP0 = /A3 * /A2 * A0 + /A3 * /A2 * A1 * /A0 + /A3 * A2 * A0 + A3 * /A2 * /A1 * A0
+ COP1 = /A3 * A0 + A3 * /A2 * /A1 * /A0
+
+ L0 = A3 * /A2 * /A1 * A0 + A3 * /A2 * A1 * /A0 + A3 * A2 * A1 * /A0
+ L1 = /A3 * /A2 + A3 * A2 * /A1 + A3 * /A2 * /A1 * A0 + A3 * /A2 * A1 * /A0 + A3 * A2 * A1 * /A0
+ L2 = A3 * A2 * /A1 + A3 * A2 * A1 * /A0
+ L3 = /A3 * /A2 + A3 * /A2 * A1 * A0 + A3 * A2 * /A1 * /A0 + A3 * A2 * A1 * /A0
+
