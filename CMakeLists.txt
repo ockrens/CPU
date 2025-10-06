@@ -6,17 +6,17 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Project name and language
-project(CPU-Assembler VERSION 0.1.0 LANGUAGES C)
+project(CPU-Assembler VERSION 0.1.0 LANGUAGES CXX)
 
 # Set the C standard (optional)
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Include directories
 include_directories(include)
 
 # Source files
-file(GLOB SRC_FILES src/*.c)
+file(GLOB SRC_FILES src/*.cpp)
 
 # Executable target
 add_executable(CPU-Assembler ${SRC_FILES})
