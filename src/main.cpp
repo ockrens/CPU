@@ -43,17 +43,21 @@ int main() {
 
 
 string myText;
-
+Instruction inst;
+DecodedInstruction decoded;
 
 // Read from the text file
 fstream InputFile("codetest.asm");
 while(getline(InputFile, myText)){ // reads a line from the file
-cout << myText << endl;
+    cout << myText << endl;
 
-Instruction inst = parser.parseInstruction(myText);
-    cout << "Mnemonic: " << inst.opcode << "\n";
-    cout << "Operand 1: " << inst.operand1 << "\n";
-    cout << "Operand 2: " << inst.operand2 << "\n";
+    //restets the values in the structs
+    inst.reset();
+    decoded.reset();
+
+    inst = parser.parseInstruction(myText);
+    decoded = parser.decodeInstruction(inst);
+    int binary = parser.encodeBinary(decoded);
 }
 InputFile.close();
 return 0;
