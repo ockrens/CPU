@@ -8,6 +8,9 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#define instructionLength uint16_t
+#define MemoryWidth uint8_t
+
 #include <string>
 #include <vector>
 using namespace std; // ✅ Use standard namespace
@@ -32,13 +35,15 @@ struct Instruction {
 };
 struct DecodedInstruction{
     string opcodeName;
-    uint8_t opcode;
-    uint8_t regDest;
-    uint8_t regSrc;
+    instructionLength opcode;
+    instructionLength regDest;
+    instructionLength regSrc;
     bool isImmediate = false;
-    uint8_t immediate;
+    bool fitInImm4 = false;
+    instructionLength immediate_8;
+    instructionLength immediate_4;
 
-    DecodedInstruction() : opcodeName(""), opcode(0), regDest(0), regSrc(0), isImmediate(false), immediate(0) {}
+    DecodedInstruction() : opcodeName(""), opcode(0), regDest(0), regSrc(0), isImmediate(false), immediate_8(0), immediate_4(0), fitInImm4(false){}
 
     ~DecodedInstruction(){}
 
@@ -48,7 +53,7 @@ struct DecodedInstruction{
         regDest = 0;
         regSrc = 0;
         isImmediate = false;
-        immediate = 0;
+        immediate_8 = 0;
     }
 };
 

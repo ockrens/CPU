@@ -108,10 +108,12 @@ DecodedInstruction Parser::decodeInstruction(const Instruction& inst) const{
         if (immedateValue < 0 || immedateValue > 255){
             throw invalid_argument("Error: Immediate value out of range (0-255): " + inst.operand2);
         }
-
         else{
-            decodeparts.immediate = static_cast<uint8_t>(stoi(inst.operand2));
+            if (immedateValue < 0 || immedateValue > 15) decodeparts.fitInImm4 = true;
+            decodeparts.immediate_8 = (static_cast<uint8_t>(stoi(inst.operand2))) << 8;
+            decodeparts.immediate_8 = (static_cast<uint8_t>(stoi(inst.operand2))) << 12;
         }
+        
     }
 
     else if (reg2 == Register::INVALID)
@@ -156,7 +158,7 @@ int Parser::encodeBinary(const DecodedInstruction& decoded) const{
             cout << decoded.regDest << endl;
 
             if (decoded.isImmediate)
-                cout << decoded.immediate << endl;
+                cout << decoded.immediate_8 << endl;
                         
             else {
                 cout << decoded.regSrc << endl;
