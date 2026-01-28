@@ -12,8 +12,8 @@
 OPCode          ShiftOP              CarryOP            logic Unit
 ADD     0000    LHS     01         Zero         00      RHS     1010
 ADDC    0001    LHS     01         Carryflag    11      RHS     1010   
-SUB     0010    LHS     01         One          01      RHS     1010         
-SUBC    0011    LHS     01         Carryflag    11      RHS     1010  
+SUB     0010    LHS     01         One          01      Not RHS 0101
+SUBC    0011    LHS     01         Carryflag    11      Not RHS 0101 
 SHL     0100    SHL     10         Zero         00      Zero    0000     
 SHLC    0101    SHL     10         Carryflag    11      Zero    0000 
 SHR     0110    SHR     11         Zero         00      Zero    0000
@@ -32,8 +32,8 @@ FSWAP   1110    Zero    00         Zero         00      FSWAP   1111
  COP0 = /A3 * /A2 * A0 + /A3 * /A2 * A1 * /A0 + /A3 * A2 * A0 + A3 * /A2 * /A1 * A0
  COP1 = /A3 * A0 + A3 * /A2 * /A1 * /A0
 
- L0 = A3 * /A2 * /A1 * A0 + A3 * /A2 * A1 * /A0 + A3 * A2 * A1 * /A0
- L1 = /A3 * /A2 + A3 * A2 * /A1 + A3 * /A2 * /A1 * A0 + A3 * /A2 * A1 * /A0 + A3 * A2 * A1 * /A0
- L2 = A3 * A2 * /A1 + A3 * A2 * A1 * /A0
- L3 = /A3 * /A2 + A3 * /A2 * A1 * A0 + A3 * A2 * /A1 * /A0 + A3 * A2 * A1 * /A0
+ L0 = /A3 * /A2 * A1 + A3 * /A2 * /A1 * A0 + A3 * /A2 * A1 * /A0 + A3 * A2 * A1 * /A0
+ L1 = /A3 * /A2 * /A1 + A3 * /A2 * /A1 * A0 + A3 * /A2 * A1 * /A0 + A3 * A2
+ L2 = /A3 * /A2 * A1 + A3 * A2
+ L3 = /A3 * /A2 * /A1 + A3 * /A2 * A1 * A0 + A3 * A2 * /A1 * /A0 + A3 * A2 * A1 * /A0
 
