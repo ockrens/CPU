@@ -1,3 +1,0 @@
-C:\msys64\mingw64\bin\cmake.exe -E rm -f CMakeFiles\CPU-Assembler.dir/objects.a
-C:\msys64\mingw64\bin\ar.exe qc CMakeFiles\CPU-Assembler.dir/objects.a @CMakeFiles\CPU-Assembler.dir\objects1.rsp
-C:\msys64\mingw64\bin\g++.exe -Wl,--whole-archive CMakeFiles\CPU-Assembler.dir/objects.a -Wl,--no-whole-archive -o CPU-Assembler.exe -Wl,--out-implib,libCPU-Assembler.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\CPU-Assembler.dir\linkLibs.rsp
