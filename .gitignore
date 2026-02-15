@@ -1,9 +1,10 @@
 *.bin
 *.hex
 *.asm
-/out
-/build
+*/out
+*/build
 *.json
 *.s
-/CMakeFiles
-CMakeCache.txt
+*/CMakeFiles
+*CMakeCache.txt
+Makefile
