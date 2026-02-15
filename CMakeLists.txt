@@ -1,23 +1,20 @@
-
-
-# CMakeLists.txt
-
-# Minimum CMake version
 cmake_minimum_required(VERSION 3.10)
 
-# Project name and language
 project(CPU-Assembler VERSION 0.1.0 LANGUAGES CXX)
 
-# Set the C standard (optional)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Include directories
-include_directories(CPU-Assembler PRIVATE include)
+file(GLOB SRC_FILES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
-# Source files
-file(GLOB SRC_FILES src/*.cpp)
-
-# Executable target
 add_executable(CPU-Assembler ${SRC_FILES})
-set_target_properties(CPU-Assembler PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+target_include_directories(CPU-Assembler
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}/include
+)
+
+set_target_properties(CPU-Assembler PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}
+)

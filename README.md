@@ -1,7 +1,7 @@
 # CPU
-this is the info page
-cmake --build build
-.\CPU-Assembler.exe test.asm test.bin
+Run EXE: 
+.\CPU-Assembler.exe test.asm
+use -d for printing debug info in the terminal
 
-
+gallete compiler run code: 
 galette (filename).pld
