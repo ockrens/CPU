@@ -19,6 +19,9 @@
 #include <bitset>
 #include <optional>
 
+#define RomSize 65536
+#define RegAmmount 8
+
 #define FMask 0xF
 #define FMask8 0xFF
 #define Field0Off 0

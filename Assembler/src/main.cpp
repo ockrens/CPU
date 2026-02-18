@@ -63,6 +63,7 @@ const OpcodeFormat& findOpcodeFormat(const std::string& opcode, int lineNumber) 
 // op1 = rs    op2 = rd
 uint16_t encodeInstruction(const OpcodeFormat& op, optional<int> op1, optional<int> op2) {
     uint16_t inst = 0x0000;
+
     if (op.field0)
         inst |= (static_cast<uint16_t>(*op.field0 & FMask) <<Field0Off);
 
@@ -96,13 +97,14 @@ optional<int> parseOperand(const string& operand, int lineNumber) {
     // REGISTER: R<number>
     if (operand[0] == 'R' && operand.size() > 1) {
         for (size_t i = 1; i < operand.size(); i++) {
-            if (!isdigit(operand[i])) {
+            if ((!isdigit(operand[i])) | (stoi(operand.substr(1)) > RegAmmount - 1)) {
                 throw runtime_error(
                     "Line " + to_string(lineNumber) +
                     ": Invalid register '" + operand + "'"
                 );
             }
         }
+        
         return stoi(operand.substr(1));
     }
 
@@ -152,6 +154,8 @@ void parseLine(
 // ---------- MAIN ----------
 int main(int argc, char* argv[]) {
     bool debug = false;
+    uint8_t memory[RomSize] = {0};
+
     if (argc < 2) {
         cout << "Usage: " << argv[0] << " <input_file> [output_file]\n";
         return 1;
@@ -192,17 +196,33 @@ int main(int argc, char* argv[]) {
             parseLine(line, lineNumber, opcode, op1, op2);
             const OpcodeFormat& fmt = findOpcodeFormat(opcode, lineNumber);
             
+
+            if((fmt.RS == RSMode::imm8) && (op2 > 255 || op2 < -128))
+                throw runtime_error("Line " + to_string(lineNumber) + " Immediate value out of range for imm8 (-128 - 255)");
+
+            if((fmt.RS == RSMode::imm4) && (op2 > 255 || op2 < -8))
+                throw runtime_error("Line " + to_string(lineNumber) + " Immediate value out of range for imm4 (-8 - 16)");
+
             uint16_t instruction = encodeInstruction(fmt, op1, op2);
+
+            memory[((lineNumber - 1) * 2)] = instruction & 0xFF; // lower byte
+            memory[((lineNumber - 1) * 2) + 1] = (instruction >> 8) & 0xFF; // upper byte
+
+            //prints the instruction data when debug is enabled
             if(debug == true)
                 cout << opcode << " " << bitset<16>(instruction) << " " << hex << instruction << endl;
-            output.write(reinterpret_cast<const char*>(&instruction), sizeof(instruction));
 
+            
             lineNumber++;
         }
-    } catch (const runtime_error& e) {
+    } 
+    
+    catch (const runtime_error& e) {
         cerr << "ERROR: " << e.what() << endl;
         return 1;
     }
+    // writes the instruction to the output file
+    output.write(reinterpret_cast<const char*>(memory), RomSize);
 
     cout << "Parsed output written to: " << outputFile << endl;
     return 0;
