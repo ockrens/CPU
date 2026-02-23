@@ -12,6 +12,8 @@
 
 
  /* 
+    read the opcodes from a fils so no recompile?
+
     these proposed functions are there to make changing how te encoding works easier in the long run.
 
     to write the right databits to the given adresses.
