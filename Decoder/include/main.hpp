@@ -23,14 +23,41 @@
     function(opcode, control signals * n). 
         - control signal examples RD mode, RS mode and functional unit. all ig
  */
+
+
 #ifndef MAIN_H
 #define MAIN_H
 
 #include <iostream>
 #include <fstream>
 #include <cstdint>
+#include <vector>
+#include <nlohmann/json.hpp>
 
+using namespace std;
 
 #define MemorySize 524288
+
+
+struct Block
+{
+    string name;
+    string type;              
+
+    // block type
+    int startAddress{};
+    int endAddress{};
+
+    // address type (dynamic)
+    vector<int> addresses;
+
+    // control signals
+    string RDMode{};
+    string RSMode{};
+    string FuncUnit{};
+    uint8_t FuncData{};
+    string FlagMode{};
+    string PCMode{};
+};
 
 #endif

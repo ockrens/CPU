@@ -1,38 +1,188 @@
 /**
  * @file main.cpp
- * @brief main file for the decoder program.
+ * @brief Main file for the decoder program.
  * 
  * @author R.J. Ockhuijsen
  * @date 2026-02-23
  * @version 0.1
- * 
- * @details
- * 
  */
 
-#include "../include/main.h"
-
+#include "../include/main.hpp"
 
 #ifndef MAIN_CPP
 #define MAIN_CPP
 
 using namespace std;
+using json = nlohmann::json;
 
 uint8_t rom1Arr[MemorySize]{0};
 uint8_t rom2Arr[MemorySize]{0};
 
-int main(int argc, char const *argv[])  
-{
-    ofstream rom1File("rom1.bin", ios::out | ios::binary);
-    ofstream rom2File("rom2.bin", ios::out | ios::binary);
 
-    if (!rom1File || !rom2File) {
-        cerr << "Failed to open input file(s)\n";
+namespace nlohmann
+{
+    template <>
+    struct adl_serializer<Block>{
+        static void from_json(const json& j, Block& b){
+            j.at("name").get_to(b.name);
+            j.at("type").get_to(b.type);
+
+            // memory block
+            if (b.type == "block")
+            {
+                b.startAddress = j.value("startAddress", 0);
+                b.endAddress   = j.value("endAddress", 0);
+            }
+            // item block
+            else if (b.type == "item")
+            {
+                if (j.contains("address") && j["address"].is_array())
+                    j.at("address").get_to(b.addresses);
+                else
+                    b.addresses = {};
+            }
+
+            // controlSignals sub-object (nested)
+            if (j.contains("controlSignals") && j["controlSignals"].is_object())
+            {
+                const auto& cs = j["controlSignals"];
+                b.RDMode   = cs.value("RDMode", "NoRD");
+                b.RSMode   = cs.value("RSMode", "NoRS");
+                b.FuncUnit = cs.value("FuncUnit", "None");
+                b.FuncData = cs.value("FuncData", 0);
+                b.FlagMode = cs.value("FlagMode", "None");
+                b.PCMode   = cs.value("PCMode", "None");
+            }
+            else
+            {
+                b.RDMode   = "NULL";
+                b.RSMode   = "NULL";
+                b.FuncUnit = "MOVE";
+                b.FuncData = 0;
+                b.FlagMode = "NULL";
+                b.PCMode   = "STEP";
+            }
+        }
+    };
+}
+
+
+int main(){
+    ifstream jsonFile("test.json");
+    if (!jsonFile){
+        cerr << "Cannot open JSON file\n";
         return 1;
     }
 
+    json jdata;
+    jsonFile >> jdata;
+
+    vector<Block> blocks = jdata.at("blocks").get<vector<Block>>();
+
+    ofstream rom1File("rom1.bin", ios::out | ios::binary);
+    ofstream rom2File("rom2.bin", ios::out | ios::binary);
+
+    if (!rom1File || !rom2File){
+        cerr << "Failed to open ROM output files\n";
+        return 1;
+    }
+
+/*////////////////////////////////////////////////////
+////// Convert JSON data to ROM control singals //////
+////////////////////////////////////////////////////*/
+    for(const auto& b : blocks){
+
+        // rom 1 control signals
+        uint8_t rom1control = 0x00;
+
+        // RDMode bitset
+        if (b.RDMode == "R") rom1control |= 0x01; // bit 0
+        if (b.RDMode == "W") rom1control |= 0x02; // bit 1
+
+        // RSMode bitset
+        if (b.RSMode == "R8") rom1control |= 0x00; // bit 2-3       (maybe not needed if its starting at 0x00 (all bits are already 0))
+        if (b.RSMode == "R16") rom1control |= 0x04; // bit 2-3
+        if (b.RSMode == "Imm4") rom1control |= 0x0C; // bit 2-3
+        if (b.RSMode == "Imm8") rom1control |= 0x08; // bit 2-3
+
+        // FlagMode bitset
+        if (b.FlagMode == "R") rom1control |= 0x10; // bit 4
+        if (b.FlagMode == "W") rom1control |= 0x20; // bit 5
+
+        // PCMode bitset
+        if (b.PCMode == "STEP") rom1control |= 0x00; // bit 6-7     (maybe not needed if its starting at 0x00 (all bits are already 0))
+        if (b.PCMode == "JMPR") rom1control |= 0x40; // bit 6-7 
+        if (b.PCMode == "JMPA") rom1control |= 0x80; // bit 6-7 
+    
+
+        // rom 2 control signals
+        uint8_t rom2control = 0x00;
+
+        // FuncUnit bitset
+        if (b.FuncUnit == "ALU"){
+            rom2control |= 0x40; // bit 6-7
+            rom2control |= (b.FuncData & 0x3F); // bit 0-5 for ALU function code
+        };
+
+
+        // Write control signals to ROM arrays based on block type item
+        if (b.type == "item"){
+            for (int addr : b.addresses){
+                if (addr < MemorySize){
+                    rom1Arr[addr] = rom1control;
+                    rom2Arr[addr] = rom2control;
+                }
+                else{
+                    cerr << "Address " << addr << " exceeds memory size\n";
+                }
+            }
+        }
+
+        // Write control signals to ROM arrays based on block type block
+        if (b.type == "block"){
+            if (b.startAddress < 0 || b.endAddress >= MemorySize || b.startAddress > b.endAddress)
+            {
+                std::cerr << "Invalid address range in block: "
+                        << b.startAddress << " - " << b.endAddress << "\n";
+            }
+            else
+            {
+                for (int addr = b.startAddress; addr <= b.endAddress; addr++)
+                {
+                    rom1Arr[addr] = rom1control;
+                    rom2Arr[addr] = rom2control;
+                }
+            }
+        }
+    }
+    
+
+    // print to terminal for testing remove later
+    for (const auto& b : blocks){
+        cout << "Block: " << b.name << " Type: " << b.type << "\n";
+
+        if (b.type == "block")
+            cout << "  Start: " << b.startAddress << " End: " << b.endAddress << endl;
+        else{
+            cout << "  Adresses: ";
+            for (int v : b.addresses) cout << v << " " << endl;
+        }
+
+        cout << "  RDMode: " << b.RDMode
+            << " RSMode: " << b.RSMode
+            << " FuncUnit: " << b.FuncUnit << endl;
+    }
+
+    // ----------------------
+    // Write ROM arrays to files
+    // ----------------------
+    rom1File.write(reinterpret_cast<char*>(rom1Arr), MemorySize);
+    rom2File.write(reinterpret_cast<char*>(rom2Arr), MemorySize);
+
     rom1File.close();
     rom2File.close();
+    jsonFile.close();
+
     return 0;
 }
 

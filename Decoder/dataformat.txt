@@ -1,0 +1,29 @@
+
+{
+  "blocks": [
+    {
+      "name": "ROM1",
+      "type": "block",
+      "startAddress": 0,
+      "endAddress": 255,
+      "controlSignals": {
+      }
+    },
+    {
+      "name": "CTRL",
+      "type": "item",
+      "address": [5, 7, 9, 12, 42],
+      "controlSignals": {
+      }
+    }
+  ]
+}
+
+"controlSignals": {
+    "RDMode": = R, W
+    "RSMode": = R8, R16, Imm4, Imm8
+    "FuncUnit": = MOVE, ALU
+    "FuncData": = int (5 .. 0)
+    "FlagMode": = R, W
+    "PcMode": = STEP, JMPR, JUMPA
+}

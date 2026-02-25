@@ -12,8 +12,8 @@
 #ifndef MAIN_CPP
 #define MAIN_CPP
 
-#include "../include/main.h"
-#include "../include/inst_def.h"
+#include "../include/main.hpp"
+#include "../include/inst_def.hpp"
 
 using namespace std;
 
