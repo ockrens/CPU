@@ -41,6 +41,11 @@ namespace nlohmann
                 else
                     b.addresses = {};
             }
+            else if (b.type == "bitmode")
+            {
+               b.bitMode = j.value("bits", string(16,'0'));
+            }
+
 
             // controlSignals sub-object (nested)
             if (j.contains("controlSignals") && j["controlSignals"].is_object())
@@ -96,18 +101,19 @@ int main(){
         uint8_t rom1control = 0x00;
 
         // RDMode bitset
-        if (b.RDMode == "R") rom1control |= 0x01; // bit 0
-        if (b.RDMode == "W") rom1control |= 0x02; // bit 1
-
+        if (b.RDMode == "R") rom1control    |= 0x01; // bit 0
+        if (b.RDMode == "W") rom1control    |= 0x02; // bit 1
+        if (b.RDMode == "RW") rom1control   |= 0x03; // bit 0-1
         // RSMode bitset
-        if (b.RSMode == "R8") rom1control |= 0x00; // bit 2-3       (maybe not needed if its starting at 0x00 (all bits are already 0))
-        if (b.RSMode == "R16") rom1control |= 0x04; // bit 2-3
+        cout << "RDMode: " << hex << rom1control << endl;
+        if (b.RSMode == "R8") rom1control   |= 0x00; // bit 2-3       (maybe not needed if its starting at 0x00 (all bits are already 0))
+        if (b.RSMode == "R16") rom1control  |= 0x04; // bit 2-3
         if (b.RSMode == "Imm4") rom1control |= 0x0C; // bit 2-3
         if (b.RSMode == "Imm8") rom1control |= 0x08; // bit 2-3
-
+        cout << "RSMode: " << hex << rom1control << endl;
         // FlagMode bitset
-        if (b.FlagMode == "R") rom1control |= 0x10; // bit 4
-        if (b.FlagMode == "W") rom1control |= 0x20; // bit 5
+        if (b.FlagMode == "R") rom1control  |= 0x10; // bit 4
+        if (b.FlagMode == "W") rom1control  |= 0x20; // bit 5
 
         // PCMode bitset
         if (b.PCMode == "STEP") rom1control |= 0x00; // bit 6-7     (maybe not needed if its starting at 0x00 (all bits are already 0))
@@ -124,6 +130,54 @@ int main(){
             rom2control |= (b.FuncData & 0x3F); // bit 0-5 for ALU function code
         };
 
+        if (b.type == "bitmode"){
+            // Remove spaces from bitMode string
+            std::string pattern;
+            for (char c : b.bitMode){
+                if (!std::isspace(static_cast<unsigned char>(c)))
+                    pattern += c;
+            }
+
+            if (pattern.size() != 16){
+                cerr << "bitMode must contain 16 bits (excluding spaces)\n";
+                continue;
+            }
+
+            vector<int> floatingPositions;
+            uint16_t staticMask = 0;
+
+            // Build static mask and floating positions
+            for (int i = 0; i < 16; i++){
+                int bitPosition = 15 - i;  // MSB left
+
+                if (pattern[i] == '1'){
+                    staticMask |= (1 << bitPosition);
+                }
+                else if (pattern[i] == '2'){
+                    floatingPositions.push_back(bitPosition);
+                }
+            }
+
+            int floatingCount = floatingPositions.size();
+            int combinations = 1 << floatingCount;
+
+            for (int comb = 0; comb < combinations; comb++){
+                uint16_t address = staticMask;
+
+                for (int bit = 0; bit < floatingCount; bit++){
+                    if (comb & (1 << bit))
+                        address |= (1 << floatingPositions[bit]);
+                    else
+                        address &= ~(1 << floatingPositions[bit]);
+                }
+                //cout << "Generated address: " << address << dec << endl;
+
+                if (address < MemorySize){
+                    rom1Arr[address] = rom1control;
+                    rom2Arr[address] = rom2control;
+                }
+            }
+        }
 
         // Write control signals to ROM arrays based on block type item
         if (b.type == "item"){
@@ -156,23 +210,6 @@ int main(){
         }
     }
     
-
-    // print to terminal for testing remove later
-    for (const auto& b : blocks){
-        cout << "Block: " << b.name << " Type: " << b.type << "\n";
-
-        if (b.type == "block")
-            cout << "  Start: " << b.startAddress << " End: " << b.endAddress << endl;
-        else{
-            cout << "  Adresses: ";
-            for (int v : b.addresses) cout << v << " " << endl;
-        }
-
-        cout << "  RDMode: " << b.RDMode
-            << " RSMode: " << b.RSMode
-            << " FuncUnit: " << b.FuncUnit << endl;
-    }
-
     // ----------------------
     // Write ROM arrays to files
     // ----------------------

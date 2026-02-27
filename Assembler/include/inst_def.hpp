@@ -17,7 +17,7 @@
 #include <optional>
 #include <vector>
 
-
+using namespace std;
 
 enum class RSMode {
     R8 = 0,
@@ -65,11 +65,11 @@ struct OpcodeFormat {
     {}
 };
 
-inline std::vector<OpcodeFormat> OPCODES = {
+inline vector<OpcodeFormat> OPCODES = {
     OpcodeFormat("NOP",     8, 4, 2, 1),
     OpcodeFormat("HALT",    15,15,15,15),
-    OpcodeFormat("LDI",     0,0,0,3,        RSMode::imm8),
-    OpcodeFormat("MOV",     0,0,0,1,        RSMode::R8,     RDMode::W),
+    OpcodeFormat("LDI",     0,0,0,4,        RSMode::imm8),
+    OpcodeFormat("MOV",     1,0,0,0,        RSMode::R8,     RDMode::W),
 
     // ALU Operations
     OpcodeFormat("ADD",     0,0,0,2,        RSMode::R8,     RDMode::RW),

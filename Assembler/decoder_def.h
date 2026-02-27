@@ -31,7 +31,7 @@
 #define LDI     0x00    // 0000 load immediate value into register 
 #define MOV     0x04    // 0100 move value from one register to another
 #define ALU     0x0C    // 1100 ALU operation
-#define HLT     0x0003  // 0x1111 halt the program
+#define HLT     0x03  // 0x1111 halt the program
 
 // alu operations
 #define ADD     0x00    // 0001

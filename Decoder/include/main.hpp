@@ -36,7 +36,7 @@
 
 using namespace std;
 
-#define MemorySize 524288
+#define MemorySize 65536
 
 
 struct Block
@@ -50,6 +50,9 @@ struct Block
 
     // address type (dynamic)
     vector<int> addresses;
+
+    // bittype
+    string bitMode{};
 
     // control signals
     string RDMode{};

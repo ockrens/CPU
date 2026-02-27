@@ -2,7 +2,7 @@
 {
   "blocks": [
     {
-      "name": "ROM1",
+      "name": "blockExample",
       "type": "block",
       "startAddress": 0,
       "endAddress": 255,
@@ -10,9 +10,16 @@
       }
     },
     {
-      "name": "CTRL",
+      "name": "itemExample",
       "type": "item",
       "address": [5, 7, 9, 12, 42],
+      "controlSignals": {
+      }
+    }
+    {
+      "name": "bitmodeExample",
+      "type": "bitmode",
+      "bits": "0000 0000 0000 0000" // 16 bits in total do not need spaces 0 = 0, 1 = 1, 2 = every combination of one's and zero's
       "controlSignals": {
       }
     }
@@ -20,10 +27,23 @@
 }
 
 "controlSignals": {
-    "RDMode": = R, W
-    "RSMode": = R8, R16, Imm4, Imm8
-    "FuncUnit": = MOVE, ALU
+    "RDMode": = R, W, RW
+    "RSMode": = R8, R16, Imm4, Imm8 
+    "FuncUnit": = MOVE, ALU //defaluts to MOVE
     "FuncData": = int (5 .. 0)
     "FlagMode": = R, W
-    "PcMode": = STEP, JMPR, JUMPA
+    "PcMode": = STEP, JMPR, JUMPA //defaluts to STEP
 }
+    {
+      "name": "LDI",
+      "type": "bitmode",
+      "bits": "0000 0000 0000 1222",
+      "controlSignals": {
+        "RDMode": "",
+        "RSMode": "",
+        "FuncUnit": "",
+        "FuncData": "",
+        "FlagMode": "",
+        "PcMode": ""
+      }
+    }
