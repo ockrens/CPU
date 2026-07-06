@@ -101,34 +101,39 @@ int main(){
         uint8_t rom1control = 0x00;
 
         // RDMode bitset
-        if (b.RDMode == "R") rom1control    |= 0x01; // bit 0
-        if (b.RDMode == "W") rom1control    |= 0x02; // bit 1
-        if (b.RDMode == "RW") rom1control   |= 0x03; // bit 0-1
+        if (b.RDMode == "R") rom1control    |= 0x02; // bit 0*
+        if (b.RDMode == "W") rom1control    |= 0x01; // bit 1*
+        if (b.RDMode == "RW") rom1control   |= 0x00; // bit 0-1*
+        
         // RSMode bitset
-        cout << "RDMode: " << hex << rom1control << endl;
-        if (b.RSMode == "R8") rom1control   |= 0x00; // bit 2-3       (maybe not needed if its starting at 0x00 (all bits are already 0))
-        if (b.RSMode == "R16") rom1control  |= 0x04; // bit 2-3
-        if (b.RSMode == "Imm4") rom1control |= 0x0C; // bit 2-3
-        if (b.RSMode == "Imm8") rom1control |= 0x08; // bit 2-3
-        cout << "RSMode: " << hex << rom1control << endl;
-        // FlagMode bitset
+        if (b.RSMode == "R8") rom1control   |= 0x08; // bit 2-3  10     (maybe not needed if its starting at 0x00 (all bits are already 0))
+        if (b.RSMode == "R16") rom1control  |= 0x0C; // bit 2-3  11
+        if (b.RSMode == "Imm4") rom1control |= 0x04; // bit 2-3  01   
+        if (b.RSMode == "Imm8") rom1control |= 0x00; // bit 2-3  00
+
+        // FlagMode bitset (not physically implemented yet)
         if (b.FlagMode == "R") rom1control  |= 0x10; // bit 4
         if (b.FlagMode == "W") rom1control  |= 0x20; // bit 5
 
-        // PCMode bitset
+        // PCMode bitset (not physically implemented yet)
         if (b.PCMode == "STEP") rom1control |= 0x00; // bit 6-7     (maybe not needed if its starting at 0x00 (all bits are already 0))
         if (b.PCMode == "JMPR") rom1control |= 0x40; // bit 6-7 
         if (b.PCMode == "JMPA") rom1control |= 0x80; // bit 6-7 
     
 
         // rom 2 control signals
-        uint8_t rom2control = 0x00;
+        uint8_t rom2control = 0x00; 
 
         // FuncUnit bitset
+        if (b.FuncUnit != "ALU") rom2control |= 0x80; // bit 6-7
         if (b.FuncUnit == "ALU"){
             rom2control |= 0x40; // bit 6-7
             rom2control |= (b.FuncData & 0x3F); // bit 0-5 for ALU function code
         };
+
+/*////////////////////////////////////////////////////
+////// Write the control signals to the array's //////
+////////////////////////////////////////////////////*/
 
         if (b.type == "bitmode"){
             // Remove spaces from bitMode string
@@ -176,6 +181,8 @@ int main(){
                     rom1Arr[address] = rom1control;
                     rom2Arr[address] = rom2control;
                 }
+                if(b.name != "LDI")
+                cout << "op " << b.name <<"   RSMode " << b.RSMode << ": " << "address "<< hex << static_cast<int>(address) << dec << "coded "<< hex << static_cast<int>(rom1control)<< endl;
             }
         }
 

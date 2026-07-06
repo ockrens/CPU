@@ -66,28 +66,27 @@ struct OpcodeFormat {
 };
 
 inline vector<OpcodeFormat> OPCODES = {
-    OpcodeFormat("NOP",     8, 4, 2, 1),
-    OpcodeFormat("HALT",    15,15,15,15),
-    OpcodeFormat("LDI",     0,0,0,4,        RSMode::imm8),
+    OpcodeFormat("NOP",     0, 0, 0, 0                               ),
+    OpcodeFormat("HALT",    15,15,15,15                              ),
+    OpcodeFormat("LDI",     0,0,0,4,        RSMode::imm8,   RDMode::W),         
     OpcodeFormat("MOV",     1,0,0,0,        RSMode::R8,     RDMode::W),
 
     // ALU Operations
-    OpcodeFormat("ADD",     0,0,0,2,        RSMode::R8,     RDMode::RW),
-    OpcodeFormat("ADDC",    1,0,0,2,        RSMode::R8,     RDMode::RW),
-    OpcodeFormat("SUB",     2,0,0,2,        RSMode::R8,     RDMode::RW),
-    OpcodeFormat("SUBC",    3,0,0,2,        RSMode::R8,     RDMode::RW),  
-    OpcodeFormat("SHL",     4,0,0,2,        nullopt,        RDMode::RW),
-    OpcodeFormat("SHLC",    5,0,0,2,        nullopt,        RDMode::RW),
-    OpcodeFormat("SHR",     6,0,0,2,        nullopt,        RDMode::RW),
-    OpcodeFormat("SHRC",    7,0,0,2,        nullopt,        RDMode::RW),
-    OpcodeFormat("SHRA",    8,0,0,2,        nullopt,        RDMode::RW),
-    //  OpcodeFormat("NEG",     9,0,0,2,        nullopt,     RDMode::RW),
-    //  OpcodeFormat("NOT",     10,0,0,2,       nullopt,     RDMode::RW),
-    OpcodeFormat("AND",     11,0,0,2,       RSMode::R8,     RDMode::RW),
-    OpcodeFormat("OR",      12,0,0,2,       RSMode::R8,     RDMode::RW),
-    OpcodeFormat("XOR",     13,0,0,2,       RSMode::R8,     RDMode::RW),
-    //OpcodeFormat("FSWAP", 14,0,0,2,    RSMode::R8, RDMode::RW),
-    // 15 unused for now
+    OpcodeFormat("ADD",     1,0,0,1,        RSMode::R8,     RDMode::RW),
+    OpcodeFormat("ADDC",    2,0,0,1,        RSMode::R8,     RDMode::RW),
+    OpcodeFormat("SUB",     3,0,0,1,        RSMode::R8,     RDMode::RW),
+    OpcodeFormat("SUBC",    4,0,0,1,        RSMode::R8,     RDMode::RW),  
+    OpcodeFormat("SHL",     8,0,0,1,        nullopt,        RDMode::RW),
+    OpcodeFormat("SHLC",    8,1,0,1,        nullopt,        RDMode::RW),
+    OpcodeFormat("SHR",     8,2,0,1,        nullopt,        RDMode::RW),
+    OpcodeFormat("SHRC",    8,3,0,1,        nullopt,        RDMode::RW),
+    OpcodeFormat("SHRA",    8,4,0,1,        nullopt,        RDMode::RW),
+    OpcodeFormat("NEG",     8,5,0,1,        nullopt,        RDMode::RW),
+    OpcodeFormat("NOT",     8,6,0,1,        nullopt,        RDMode::RW),
+    OpcodeFormat("AND",     5,0,0,1,        RSMode::R8,     RDMode::RW),
+    OpcodeFormat("OR",      6,0,0,1,        RSMode::R8,     RDMode::RW),
+    OpcodeFormat("XOR",     7,0,0,1,        RSMode::R8,     RDMode::RW),
+    OpcodeFormat("FSWAP",   8,8,0,1,        nullopt,        RDMode::RW),
 };
 
 #endif
