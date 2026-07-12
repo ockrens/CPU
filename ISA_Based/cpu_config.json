@@ -1,0 +1,33 @@
+{
+  "parameters": {
+    "memory_size": 65536
+  },
+  "fields": {
+    "opcode":   {"offset": 12, "width": 4},
+    "reg_dest": {"offset": 8,  "width": 4},
+    "reg_src":  {"offset": 4,  "width": 4},
+    "imm8":     {"offset": 0,  "width": 8}
+  },
+  "instructions": [
+    {
+      "name": "ADD",
+      "pattern": "0001 dddd ssss 0000",
+      "fields": ["opcode", "reg_dest", "reg_src"],
+      "control_signals": {
+        "RDMode": "RW",
+        "RSMode": "R16",
+        "FuncUnit": "ALU"
+      }
+    },
+    {
+      "name": "LDI",
+      "pattern": "0010 dddd iiii iiii",
+      "fields": ["opcode", "reg_dest", "imm8"],
+      "control_signals": {
+        "RDMode": "W",
+        "RSMode": "Imm8",
+        "FuncUnit": "MOVE"
+      }
+    }
+  ]
+}

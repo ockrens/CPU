@@ -3,7 +3,6 @@
 *.asm
 */out
 */build
-*.json
 *.s
 */CMakeFiles
 *CMakeCache.txt

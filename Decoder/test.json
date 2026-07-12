@@ -1,0 +1,197 @@
+{
+  "blocks": [
+    {
+      "name": "LDI",
+      "type": "bitmode",
+      "bits": "2222 2222 2222 0100",
+      "controlSignals": {
+        "RDMode": "W",
+        "RSMode": "Imm8"
+      }
+    },
+    {
+      "name": "MOV",
+      "type": "bitmode",
+      "bits": "0001 2222 2222 0000",
+      "controlSignals": {
+        "RDMode": "W",
+        "RSMode": "R8"
+      }
+    },
+    {
+      "name": "ADD",
+      "type": "bitmode",
+      "bits": "0001 2222 2222 0001",
+      "controlSignals": {
+        "RDMode": "RW",
+        "RSMode": "R8",
+        "FuncUnit": "ALU",
+        "FuncData":  0,
+        "flagmode": "W"
+      }
+    },
+    {
+      "name": "ADDC",
+      "type": "bitmode",
+      "bits": "0010 2222 2222 0001",
+      "controlSignals": {
+        "RDMode": "RW",
+        "RSMode": "R8",
+        "FuncUnit": "ALU",
+        "FuncData": 1,
+        "flagmode": "RW"
+      }
+    },
+    {
+      "name": "SUB",
+      "type": "bitmode",
+      "bits": "0011 2222 2222 0001",
+      "controlSignals": {
+        "RDMode": "RW",
+        "RSMode": "R8",
+        "FuncUnit": "ALU",
+        "FuncData": 2,
+        "flagmode": "W"
+      }
+    },
+    {
+      "name": "SUBC",
+      "type": "bitmode",
+      "bits": "0100 2222 2222 0001",
+      "controlSignals": {
+        "RDMode": "RW",
+        "RSMode": "R8",
+        "FuncUnit": "ALU",
+        "FuncData": 3,
+        "flagmode": "RW"
+      }
+    },
+    {
+      "name": "AND",
+      "type": "bitmode",
+      "bits": "0101 2222 2222 0001",
+      "controlSignals": {
+        "RDMode": "RW",
+        "RSMode": "R8",
+        "FuncUnit": "ALU",
+        "FuncData": 11,
+        "flagmode": "W"
+      }
+    },
+    {
+      "name": "OR",
+      "type": "bitmode",
+      "bits": "0110 2222 2222 0001",
+      "controlSignals": {
+        "RDMode": "RW",
+        "RSMode": "R8",
+        "FuncUnit": "ALU",
+        "FuncData": 12,
+        "flagmode": "W"
+      }
+    },
+    {
+      "name": "XOR",
+      "type": "bitmode",
+      "bits": "0111 2222 2222 0001",
+      "controlSignals": {
+        "RDMode": "RW",
+        "RSMode": "R8",
+        "FuncUnit": "ALU",
+        "FuncData": 13,
+        "flagmode": "W"
+      }
+    },
+    {
+      "name": "SHL",
+      "type": "bitmode",
+      "bits": "1000 0000 2222 0001",
+      "controlSignals": {
+        "RDMode": "RW",
+        "FuncUnit": "ALU",
+        "FuncData": 4,
+        "flagmode": "W"
+      }
+    },
+    {
+      "name": "SHLC",
+      "type": "bitmode",
+      "bits": "1000 0001 2222 0001",
+      "controlSignals": {
+        "RDMode": "RW",
+        "FuncUnit": "ALU",
+        "FuncData": 5,
+        "flagmode": "RW"
+      }
+    },
+    {
+      "name": "SHR",
+      "type": "bitmode",
+      "bits": "1000 0010 2222 0001",
+      "controlSignals": {
+        "RDMode": "RW",
+        "FuncUnit": "ALU",
+        "FuncData": 6,
+        "flagmode": "W"
+      }
+    },
+    {
+      "name": "SHRC",
+      "type": "bitmode",
+      "bits": "1000 0011 2222 0001",
+      "controlSignals": {
+        "RDMode": "RW",
+        "FuncUnit": "ALU",
+        "FuncData": 7,
+        "flagmode": "RW"
+      }
+    },
+    {
+      "name": "SHRL",
+      "type": "bitmode",
+      "bits": "1000 0100 2222 0001",
+      "controlSignals": {
+        "RDMode": "RW",
+        "FuncUnit": "ALU",
+        "FuncData": 8,
+        "flagmode": "RW"
+      }
+    },
+    {
+      "name": "NEG",
+      "type": "bitmode",
+      "bits": "1000 0101 2222 0001",
+      "controlSignals": {
+        "RDMode": "RW",
+        "FuncUnit": "ALU",
+        "FuncData": 9,
+        "flagmode": "W"
+      }
+    },
+    {
+      "name": "NOT",
+      "type": "bitmode",
+      "bits": "1000 0110 2222 0001",
+      "controlSignals": {
+        "RDMode": "RW",
+        "FuncUnit": "ALU",
+        "FuncData": 10,
+        "flagmode": "W"
+      }
+    },
+    {
+      "name": "FSWAP",
+      "type": "bitmode",
+      "bits": "1000 0111 2222 0001",
+      "controlSignals": {
+        "RDMode": "RW",
+        "FuncUnit": "ALU",
+        "FuncData": 14,
+        "flagmode": "W"
+      }
+    }
+
+  ]
+}
+
+    
