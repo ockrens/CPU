@@ -1,0 +1,65 @@
+{
+  "fields": {
+    "opcode":   {"offset": 0,  "width": 4},
+    "reg_dest": {"offset": 4,  "width": 4},
+    "reg_src":  {"offset": 8,  "width": 4},
+    "imm4":     {"offset": 8,  "width": 4},
+    "imm8":     {"offset": 8,  "width": 8}
+  },
+  "eeprom_layout": {
+    "rd_mode": {
+      "eeprom": 1,
+      "offset": 0,
+      "width": 2,
+      "options": {
+        "read":           1,
+        "write":          2,
+        "read_and_write": 3
+      }
+    },
+    "rs_mode": {
+      "eeprom": 1,
+      "offset": 2,
+      "width": 3,
+      "options": {
+        "imm4":           1,
+        "imm8":           2,
+        "r8":             3,
+        "r16":            4
+      }
+    },
+    "flags_mode": {
+      "eeprom": 1,
+      "offset": 5,
+      "width": 2,
+      "options": {
+        "read":           1,
+        "write":          2,
+        "read_and_write": 3
+      }
+    },
+    "func_unit": {
+      "eeprom": 2,
+      "offset": 0,
+      "width": 3,
+      "options": {
+        "NONE":    0,
+        "ALU":     1,
+        "SHIFTER": 2,
+        "BRANCH":  3
+      }
+    }
+  },
+  "instructions": {
+    "ADD": {
+      "pattern": "0000 ssss dddd 0001",
+      "control": {
+        "rd_mode": "read_and_write",
+        "rs_mode": "r16",
+        "flags_mode": "write",
+        "func_unit": "ALU",
+        "func_unit_data": 1
+      }
+    }
+  }
+}
