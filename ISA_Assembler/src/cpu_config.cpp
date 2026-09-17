@@ -20,7 +20,7 @@ bool CpuConfig::loadFromFile(const std::string& filename) {
         return false;
     }
 
-    // 1. Parse Fields (opcode, reg_dest, reg_src, imm4, imm8)
+    // 1. Parse Fields
     if (config.contains("fields")) {
         fields.clear();
         for (auto& [name, data] : config["fields"].items()) {
@@ -28,7 +28,7 @@ bool CpuConfig::loadFromFile(const std::string& filename) {
         }
     }
 
-    // 2. Parse EEPROM Layout (Dynamische toewijzing aan EEPROM 1 of EEPROM 2)
+    // 2. Parse EEPROM Layout
     if (config.contains("eeprom_layout")) {
         eeprom_layout.clear();
         for (auto& [name, data] : config["eeprom_layout"].items()) {
@@ -46,7 +46,7 @@ bool CpuConfig::loadFromFile(const std::string& filename) {
         }
     }
 
-    // 3. Parse Instructions & Genereer de fysieke EEPROM bytes
+    // 3. Parse Instructions
     if (config.contains("instructions")) {
         instructions_by_name.clear();
         for (auto& [name, data] : config["instructions"].items()) {
@@ -55,33 +55,34 @@ bool CpuConfig::loadFromFile(const std::string& filename) {
             inst.pattern = data.value("pattern", "");
             calculateMasks(inst);
             
-            // Fysieke bytes beginnen standaard in de veilige ruststand (0x00)
             inst.eeprom1_word = 0;
             inst.eeprom2_word = 0;
             
             if (data.contains("control")) {
                 auto ctrl = data["control"];
                 
-                // Verwerk alle dynamische lay-out signalen (rd_mode, rs_mode, flags_mode, func_unit)
+                // Sla de tekstuele/numerieke waarden op in de control map 🗂️
+                for (auto& [k, v] : ctrl.items()) {
+                    if (v.is_string()) {
+                        inst.control[k] = v.get<std::string>();
+                    } else if (v.is_number()) {
+                        inst.control[k] = std::to_string(v.get<int>());
+                    }
+                }
+                
+                // Verwerk EEPROM layout
                 for (auto& [sig_name, sig_cfg] : eeprom_layout) {
                     if (ctrl.contains(sig_name)) {
                         uint8_t final_val = 0;
-                        
                         if (ctrl[sig_name].is_string()) {
-                            // Zet tekst (bijv. "read_and_write") om naar de bit-waarde via de opties
                             std::string choice = ctrl[sig_name].get<std::string>();
                             if (sig_cfg.options.count(choice)) {
                                 final_val = sig_cfg.options.at(choice);
-                            } else {
-                                std::cerr << "Warning: Gekozen optie '" << choice 
-                                          << "' bestaat niet voor signaal '" << sig_name << "'\n";
                             }
                         } else if (ctrl[sig_name].is_number()) {
-                            // Direct getal (bijv. 0 of 1)
                             final_val = ctrl[sig_name].get<uint8_t>();
                         }
                         
-                        // Schuif de bits in de juiste fysieke EEPROM chip
                         if (sig_cfg.eeprom == 1) {
                             inst.eeprom1_word |= (final_val << sig_cfg.offset);
                         } else if (sig_cfg.eeprom == 2) {
@@ -90,10 +91,8 @@ bool CpuConfig::loadFromFile(const std::string& filename) {
                     }
                 }
 
-                // Verwerk func_unit_data (als los binair getal binnen het control-blok)
                 if (ctrl.contains("func_unit_data")) {
                     uint8_t data_val = ctrl["func_unit_data"].get<uint8_t>();
-                    // Shift 3 bits omhoog om ruimte te maken voor de func_unit (bits 0-2) op EEPROM 2
                     inst.eeprom2_word |= (data_val << 3); 
                 }
             }
@@ -105,18 +104,12 @@ bool CpuConfig::loadFromFile(const std::string& filename) {
 
 const Field* CpuConfig::getField(const std::string& name) const {
     auto it = fields.find(name);
-    if (it != fields.end()) {
-        return &(it->second);
-    }
-    return nullptr;
+    return (it != fields.end()) ? &(it->second) : nullptr;
 }
 
 const Instruction* CpuConfig::findInstructionByName(const std::string& name) const {
     auto it = instructions_by_name.find(name);
-    if (it != instructions_by_name.end()) {
-        return &(it->second);
-    }
-    return nullptr;
+    return (it != instructions_by_name.end()) ? &(it->second) : nullptr;
 }
 
 const Instruction* CpuConfig::findInstructionByPattern(uint16_t machine_code) const {
@@ -133,16 +126,13 @@ void CpuConfig::calculateMasks(Instruction& inst) {
     uint16_t mask = 0;
     int bit_position = 15;
 
-    // Haal spaties uit het patroon string weg
     std::string clean_pattern = "";
     for (char c : inst.pattern) {
         if (c != ' ') clean_pattern += c;
     }
 
-    // Bouw de bitmasks op van bit 15 naar bit 0
     for (char c : clean_pattern) {
         if (bit_position < 0) break;
-
         if (c == '0') {
             mask |= (1 << bit_position);
         } else if (c == '1') {

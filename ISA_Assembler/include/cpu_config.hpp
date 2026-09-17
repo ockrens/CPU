@@ -23,6 +23,7 @@ struct Instruction {
     uint16_t match_mask;
     uint8_t eeprom1_word;   // Fysieke byte voor EEPROM 1
     uint8_t eeprom2_word;   // Fysieke byte voor EEPROM 2
+    std::unordered_map<std::string, std::string> control;
 };
 
 class CpuConfig {

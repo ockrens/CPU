@@ -55,8 +55,8 @@
       "pattern": "0000 ssss dddd 0001",
       "control": {
         "rd_mode": "read_and_write",
-        "rs_mode": "r16",
-        "flags_mode": "write",
+        "rs_mode": "r18",
+        "flags_mode": "Read_and_write",
         "func_unit": "ALU",
         "func_unit_data": 1
       }
