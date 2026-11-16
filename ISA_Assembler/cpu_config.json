@@ -1,4 +1,10 @@
 {
+  "settings": {
+    "eeprom_size": 65536,
+    "eeprom_count": 2,
+    "register_count": 8,
+    "instruction_width": 16
+  },
   "fields": {
     "opcode":   {"offset": 0,  "width": 4},
     "reg_dest": {"offset": 4,  "width": 4},
@@ -55,8 +61,8 @@
       "pattern": "0000 ssss dddd 0001",
       "control": {
         "rd_mode": "read_and_write",
-        "rs_mode": "r18",
-        "flags_mode": "Read_and_write",
+        "rs_mode": "r16",
+        "flags_mode": "read_and_write",
         "func_unit": "ALU",
         "func_unit_data": 1
       }

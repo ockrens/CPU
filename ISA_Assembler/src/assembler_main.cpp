@@ -1,220 +1,206 @@
-#include "cpu_config.hpp"
 #include <iostream>
 #include <fstream>
-#include <sstream>
+#include <iomanip>
+#include <bitset>
+#include "cpu_config.hpp"
+#include <stdexcept>
+#include <cstring>
 #include <vector>
-#include <string>
-#include <algorithm>
-#include <cctype>
-#include <optional>
-#include <cstdint>
-#include <iomanip> // Voor std::setw en std::setfill
 
-std::vector<std::string> readAssemblyFile(const std::string& filename) {
-    std::vector<std::string> lines;
-    std::ifstream file(filename);
-    if (!file.is_open()) return lines;
+std::string trim(const std::string& str) {
+    size_t first = str.find_first_not_of(" \t\r\n");
+    if (first == std::string::npos) return "";
+    size_t last = str.find_last_not_of(" \t\r\n");
+    return str.substr(first, (last - first + 1));
+}
+
+
+int main(int argc, char *argv[]) {
+
+    /*---------------------------------
+    ----- Terminal Input Handling -----
+    ---------------------------------*/
+    if (argc < 2) {
+        throw std::runtime_error("No program argument provided. Specify a .s or .asm file.");
+    }
+
+    const char *filepointer = argv[1];
+    size_t len = std::strlen(filepointer);
+    std::string filename = argv[1];
+    std::string filename_sanitized = filename.substr(0, filename.find_last_of('.')) + ".txt";
+
+    bool is_s = (len >= 2 && std::strcmp(filepointer+ len - 2, ".s") == 0);
+    bool is_asm = (len >= 4 && std::strcmp(filepointer+ len - 4, ".asm") == 0);
+
+    if (!is_s && !is_asm) {
+        throw std::runtime_error("Provide a valid .s or .asm file as an argument.");
+    }
+
+
+
+
+    /*----------------------
+    ----- File Loading -----
+    ----------------------*/
+
+    // Laad de CPU-configuratie
+    CpuConfig config;
+    if (!config.loadFromFile("cpu_config.json")) {
+        return 1;
+    }
+    // Print het bestand
+    std::ifstream asm_file(filepointer);
+    std::ofstream sanitized_file(filename_sanitized);
+
+
+    /*---------------------------
+    ----- File Sanitization -----
+    ---------------------------*/
+    std::vector<std::string> sanitized_lines;
     std::string line;
-    while (std::getline(file, line)) lines.push_back(line);
-    return lines;
-}
-
-bool isInstructionLine(const std::string& line) {
-    std::string clean = line;
-    size_t comment_pos = clean.find(';');
-    if (comment_pos != std::string::npos) clean = clean.substr(0, comment_pos);
-    for (char c : clean) {
-        if (!std::isspace(static_cast<unsigned char>(c))) return true;
-    }
-    return false;
-}
-
-std::string sanitizeInstruction(const std::string& line) {
-    std::string clean = line;
-    size_t comment_pos = clean.find(';');
-    if (comment_pos != std::string::npos) clean = clean.substr(0, comment_pos);
-    size_t label_pos = clean.find(':');
-    if (label_pos != std::string::npos) clean = clean.substr(label_pos + 1);
-    return clean;
-}
-
-std::optional<int32_t> parseOperandStrict(const std::string& arg, int line_num, const std::string& arg_type) {
-    if (arg.empty()) return std::nullopt;
-    try {
-        if (arg[0] == 'R' || arg[0] == 'r') {
-            return std::stoi(arg.substr(1));
+    while (std::getline(asm_file, line)) {
+        // 1. Verwijder commentaar
+        size_t comment_pos = line.find(';');
+        if (comment_pos != std::string::npos) {
+            line = line.substr(0, comment_pos);
         }
-        return std::stoi(arg, nullptr, 0);
-    } catch (...) {
-        std::cerr << "  [ASSEMBLER ERROR] Regel " << line_num 
-                  << ": Ongeldige syntaxis voor " << arg_type << " '" << arg << "'\n";
-        return std::nullopt;
+
+        // 2. Trim witruimte
+        size_t first = line.find_first_not_of(" \t\r\n");
+        if (first == std::string::npos) {
+            continue;
+        }
+        size_t last = line.find_last_not_of(" \t\r\n");
+        line = line.substr(first, (last - first + 1));
+
+        // 3. Sla intern op in de vector
+        sanitized_lines.push_back(line);
+
+        // 4. (Optioneel) Schrijf ook weg naar bestand ter controle
+        if (sanitized_file.is_open()) {
+            sanitized_file << line << '\n';
+        }
     }
-}
+    /*-------------------------
+    ----- Label handeling -----
+    -------------------------*/
+    // Vanaf hier werk je verder met 'sanitized_lines':
+    std::unordered_map<std::string, uint32_t> symbol_table;
+    const uint32_t INSTRUCTION_SIZE = 1; // <-- Pas aan naar het aantal bytes/woorden per instructie (bijv. 1, 2 of 4)
+    uint32_t current_address = 0;
 
-// Validator voor gecombineerde signed (-2^(w-1)) én unsigned (2^w - 1) bereiken
-bool validateAndFormatImmediate(int32_t val, int width, uint16_t& out_bits) {
-    int32_t min_signed = -(1 << (width - 1));
-    int32_t max_unsigned = (1 << width) - 1;
+    // =========================================================================
+    // PASS 1: Labels en ORG-offsets verzamelen (sanitized_lines blijft intact)
+    // =========================================================================
+    for (const std::string& instruction : sanitized_lines) {
+        std::string temp = instruction;
 
-    if (val < min_signed || val > max_unsigned) {
-        return false;
+        // 1. Check op een label (bijv. "loop:" of "start: MOV AX, 1")
+        size_t colon_pos = temp.find(':');
+        if (colon_pos != std::string::npos) {
+            std::string label_name = trim(temp.substr(0, colon_pos));
+            
+            if (symbol_table.count(label_name)) {
+                std::cerr << "Fout: Label '" << label_name << "' is dubbel gedefinieerd!\n";
+                return 1;
+            }
+            symbol_table[label_name] = current_address;
+
+            // Kijk of er ná het label nog iets op dezelfde regel staat
+            temp = trim(temp.substr(colon_pos + 1));
+            if (temp.empty()) {
+                continue; // Alleen een label op deze regel -> adres verandert niet
+            }
+        }
+
+        // 2. Check op ORG directive (bijv. "ORG 0x100" of "org 256")
+        if (temp.rfind("ORG ", 0) == 0 || temp.rfind("org ", 0) == 0) {
+            std::string addr_str = trim(temp.substr(4));
+            current_address = std::stoul(addr_str, nullptr, 0);
+            continue; // ORG neemt zelf geen geheugenruimte in
+        }
+
+        // 3. Het is een echte instructie -> hoog het adres op met de instructiegrootte
+        current_address += INSTRUCTION_SIZE;
     }
 
-    uint32_t mask = (1U << width) - 1U;
-    out_bits = static_cast<uint16_t>(val & mask);
-    return true;
-}
+    // =========================================================================
+    // PASS 2: Instructies daadwerkelijk parsen met behulp van symbol_table
+    // =========================================================================
+    current_address = 0; // Reset de teller weer naar het begin
 
-std::optional<uint16_t> assembleLine(const CpuConfig& config, const std::string& raw_line, int line_num) {
-    std::string line = raw_line;
-    std::replace(line.begin(), line.end(), ',', ' ');
-    
-    std::stringstream ss(line);
-    std::string mnemonic;
-    ss >> mnemonic;
+    for (const std::string& instruction : sanitized_lines) {
+        std::string line = instruction;
 
-    if (mnemonic.empty()) return std::nullopt;
+        // 1. Strip het label er nu wél vanaf (het adres staat immers al in symbol_table)
+        size_t colon_pos = line.find(':');
+        if (colon_pos != std::string::npos) {
+            line = trim(line.substr(colon_pos + 1));
+            if (line.empty()) {
+                continue; // Regel bevatte alleen een label, niets om te parsen
+            }
+        }
 
+        // 2. Verwerk ORG opnieuw zodat current_address synchroon loopt
+        if (line.rfind("ORG ", 0) == 0 || line.rfind("org ", 0) == 0) {
+            std::string addr_str = trim(line.substr(4));
+            current_address = std::stoul(addr_str, nullptr, 0);
+            continue;
+        }
+
+        // 3. Parse de overgebleven instructie!
+        // 'line' is nu gegarandeerd een schone instructie (bijv. "JMP einde" of "MOV R0, 5")
+        // en 'current_address' is het exacte adres waar deze instructie komt te staan.
+
+        // ... Jouw parse-logica hier ...
+
+        // Verhoog na het parsen weer het adres met dezelfde grootte
+        current_address += INSTRUCTION_SIZE;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    // Stel: we assembleren "ADD R2, R3"
+    std::string mnemonic = "ADD";
+    uint16_t dest_reg = 2; // R2
+    uint16_t src_reg  = 3; // R3
+
+    // 1. Zoek de instructie op
     const Instruction* inst = config.findInstructionByName(mnemonic);
     if (!inst) {
-        std::cerr << "  [ASSEMBLER ERROR] Regel " << line_num 
-                  << ": Onbekende instructie '" << mnemonic << "'\n";
-        return std::nullopt;
+        std::cerr << "Onbekende instructie: " << mnemonic << "\n";
+        return 1;
     }
 
+    // 2. Start met de vaste opcode-bits uit het patroon ("0000 ssss dddd 0001" -> 0x0001)
     uint16_t machine_code = inst->base_value;
 
-    std::vector<std::string> args;
-    std::string arg;
-    while (ss >> arg) args.push_back(arg);
+    // 3. Gebruik de bitmasks uit CpuConfig om de velden te vullen
+    config.packField(machine_code, "reg_dest", dest_reg);
 
-    const int32_t MAX_REGISTER_INDEX = 7; 
-
-    // -------------------------------------------------------------
-    // 1. Eerste argument (args[0]) -> Moet ALTIJD een register zijn
-    // -------------------------------------------------------------
-    if (args.size() >= 1) {
-        bool is_register = (args[0][0] == 'R' || args[0][0] == 'r');
-        
-        // Voorkom dat getallen (zoals '20' in 'ADD 20, r1') worden geïnterpreteerd als register
-        if (!is_register) {
-            std::cerr << "  [ASSEMBLER ERROR] Regel " << line_num 
-                      << ": Instructie '" << mnemonic 
-                      << "' verwacht een bestemmingsregister als eerste argument, maar kreeg '" << args[0] << "'.\n";
-            return std::nullopt;
-        }
-
-        const Field* dest = config.getField("reg_dest");
-        if (dest) {
-            auto val = parseOperandStrict(args[0], line_num, "bestemmingsregister");
-            if (!val.has_value()) return std::nullopt;
-
-            if (val.value() < 0 || val.value() > MAX_REGISTER_INDEX) {
-                std::cerr << "  [ASSEMBLER ERROR] Regel " << line_num 
-                          << ": Register R" << val.value() << " bestaat niet!\n";
-                return std::nullopt;
-            }
-            machine_code |= (static_cast<uint16_t>(val.value()) << dest->offset);
-        }
-    }
-    
-    // -------------------------------------------------------------
-    // 2. Tweede argument (args[1]) -> Controle tegen rs_mode
-    // -------------------------------------------------------------
-    if (args.size() >= 2) {
-        bool is_register = (args[1][0] == 'R' || args[1][0] == 'r');
-        std::string rs_mode = inst->control.count("rs_mode") ? inst->control.at("rs_mode") : "";
-
-        // Check 1: rs_mode is een register, maar gebruiker geeft een getal
-        if ((rs_mode == "r8" || rs_mode == "r16") && !is_register) {
-            std::cerr << "  [ASSEMBLER ERROR] Regel " << line_num 
-                      << ": Instructie '" << mnemonic 
-                      << "' verwacht een bronregister als tweede argument, maar kreeg '" << args[1] << "'.\n";
-            return std::nullopt;
-        }
-
-        // Check 2: rs_mode is een immediate, maar gebruiker geeft een register
-        if ((rs_mode == "imm4" || rs_mode == "imm8") && is_register) {
-            std::cerr << "  [ASSEMBLER ERROR] Regel " << line_num 
-                      << ": Instructie '" << mnemonic 
-                      << "' verwacht een immediate waarde als tweede argument, maar kreeg register '" << args[1] << "'.\n";
-            return std::nullopt;
-        }
-
-        // Verwerk register als rs_mode dat eist
-        if (is_register) {
-            const Field* src = config.getField("reg_src");
-            auto val = parseOperandStrict(args[1], line_num, "bronregister");
-            if (!val.has_value() || !src) return std::nullopt;
-
-            if (val.value() < 0 || val.value() > MAX_REGISTER_INDEX) {
-                std::cerr << "  [ASSEMBLER ERROR] Regel " << line_num 
-                          << ": Register R" << val.value() << " bestaat niet!\n";
-                return std::nullopt;
-            }
-            machine_code |= (static_cast<uint16_t>(val.value()) << src->offset);
-
-        } else {
-            // Verwerk immediate op basis van de exacte breedte uit rs_mode
-            const Field* imm = config.getField(rs_mode); 
-            if (!imm) imm = config.getField("imm8");
-            if (!imm) imm = config.getField("imm4");
-
-            auto val = parseOperandStrict(args[1], line_num, "immediate waarde");
-            if (!val.has_value() || !imm) return std::nullopt;
-
-            uint16_t formatted_bits = 0;
-            if (!validateAndFormatImmediate(val.value(), imm->width, formatted_bits)) {
-                int32_t min_signed = -(1 << (imm->width - 1));
-                int32_t max_unsigned = (1 << imm->width) - 1;
-                std::cerr << "  [ASSEMBLER ERROR] Regel " << line_num 
-                          << ": Waarde " << val.value() << " valt buiten bereik van " 
-                          << imm->width << "-bit field (toegestaan: " << min_signed 
-                          << " t/m " << max_unsigned << ")\n";
-                return std::nullopt;
-            }
-
-            machine_code |= (formatted_bits << imm->offset);
-        }
+    // Controleer via rs_mode of het tweede argument een register of immediate is
+    std::string rs_mode = inst->getControl("rs_mode");
+    if (rs_mode == "r8" || rs_mode == "r16") {
+        config.packField(machine_code, "reg_src", src_reg);
+    } else if (rs_mode == "imm4" || rs_mode == "imm8") {
+        config.packField(machine_code, rs_mode, src_reg);
     }
 
-    return machine_code;
-}
+    // 4. Print het resultaat
+    std::cout << "=== ASSEMBLER OUTPUT ===\n";
+    std::cout << "Instructie   : " << mnemonic << " R" << dest_reg << ", R" << src_reg << "\n";
+    std::cout << "Patroon      : " << inst->pattern << "\n";
+    std::cout << "Machinetaal  : 0x" << std::hex << std::setw(4) << std::setfill('0') << machine_code << std::dec << "\n";
+    std::cout << "Binair       : " << std::bitset<16>(machine_code) << "\n";
 
-int main() {
-    CpuConfig config;
-    if (!config.loadFromFile("cpu_config.json")) return 1;
-
-    std::vector<std::string> file_lines = readAssemblyFile("test.asm");
-    std::vector<uint16_t> program_rom;
-    int error_count = 0;
-
-    std::cout << "--- Start Assembleren ---\n";
-
-    for (size_t i = 0; i < file_lines.size(); ++i) {
-        int line_num = static_cast<int>(i + 1);
-        std::string clean_inst = sanitizeInstruction(file_lines[i]);
-
-        if (isInstructionLine(clean_inst)) {
-            auto machine_code = assembleLine(config, clean_inst, line_num);
-
-            if (machine_code.has_value()) {
-                program_rom.push_back(machine_code.value());
-                
-                // Formatteer de hex-output altijd met 4 karakters inclusief voorloopnullen
-                std::cout << "[OK] Regel " << line_num << ": " << clean_inst 
-                          << " -> Hex: 0x" 
-                          << std::hex << std::setw(4) << std::setfill('0') << machine_code.value() 
-                          << std::dec << "\n";
-            } else {
-                error_count++;
-            }
-        }
-    }
-
-    std::cout << "\n--- Assemblage Voltooid ---\n";
-    std::cout << "Succesvol: " << program_rom.size() << " | Fouten: " << error_count << "\n";
-
-    return (error_count == 0) ? 0 : 1;
+    return 0;
 }
